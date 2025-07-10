@@ -4,32 +4,65 @@ export const parsePrayerTimesCSV = (csvText) => {
   const lines = csvText.trim().split('\n')
   const headers = lines[0].split(',')
   const data = {}
-  
+
   for (let i = 1; i < lines.length; i++) {
     const values = lines[i].split(',')
     const date = values[0]
+
+    // Skip empty lines
+    if (!date || date.trim() === '') continue
+
     data[date] = {
-      imsaku: values[1],
-      sunrise: values[2],
-      dreka: values[3],
-      ikindia: values[4],
-      akshami: values[5],
-      jacia: values[6]
+      imsaku: values[1],      // Imsaku
+      sabahu: values[2],      // Sabahu (not used in display)
+      sunrise: values[3],     // Lindja (sunrise)
+      dreka: values[4],       // Dreka
+      ikindia: values[5],     // Ikindia
+      akshami: values[6],     // Akshami
+      jacia: values[7],       // Jacia
+      festat: values[8],      // Festat (holidays)
+      shenime: values[9]      // Shenime (notes)
     }
   }
-  
+
   return data
 }
 
 export const getTodaysPrayerTimes = (prayerData) => {
   const today = new Date().toISOString().split('T')[0]
-  return prayerData[today] || {
+  const todayData = prayerData[today]
+
+  if (todayData) {
+    return {
+      imsaku: todayData.imsaku,
+      sunrise: todayData.sunrise,
+      dreka: todayData.dreka,
+      ikindia: todayData.ikindia,
+      akshami: todayData.akshami,
+      jacia: todayData.jacia
+    }
+  }
+
+  // Fallback times if date not found
+  return {
     imsaku: '02:47',
     sunrise: '04:59',
     dreka: '12:44',
     ikindia: '16:47',
     akshami: '20:22',
     jacia: '22:24'
+  }
+}
+
+// Function to load CSV file
+export const loadPrayerTimesFromCSV = async () => {
+  try {
+    const response = await fetch('/prayer_times.csv')
+    const csvText = await response.text()
+    return parsePrayerTimesCSV(csvText)
+  } catch (error) {
+    console.error('Error loading prayer times CSV:', error)
+    return {}
   }
 }
 
