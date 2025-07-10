@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.j
 import { Settings, Sun, Moon, Sunrise } from 'lucide-react'
 import mosqueBg from './assets/mosque-bg.jpg'
 import { albanianQuotes, formatAlbanianDate, prayerNames } from './utils/prayerData.js'
+import { formatIslamicDate } from './utils/hijri-converter.js'
 import './App.css'
 
 function App() {
@@ -295,7 +296,7 @@ function App() {
             {formatAlbanianDate(currentTime)}
           </div>
           <div className="text-lg font-medium">
-            15/ Muharrem /1447 AH
+            {formatIslamicDate(currentTime)}
           </div>
         </div>
 
