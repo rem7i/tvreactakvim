@@ -4,18 +4,15 @@ import { Input } from '@/components/ui/input.jsx'
 import { Label } from '@/components/ui/label.jsx'
 import { Switch } from '@/components/ui/switch.jsx'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.jsx'
-import { Settings, Sun, Moon, Sunrise } from 'lucide-react'
+import { Settings, Sun, Moon, Sunset, Sunrise } from 'lucide-react'
 import mosqueBg from './assets/mosque-bg.jpg'
 import { albanianQuotes, formatAlbanianDate, prayerNames, loadPrayerTimesFromCSV, getTodaysPrayerTimes } from './utils/prayerData.js'
 import { formatIslamicDate } from './utils/hijri-converter.js'
 import './App.css'
 
 function App() {
-  const [showForm, setShowForm] = useState(() => {
-    // Show form initially only if no data is saved
-    const saved = localStorage.getItem('mosqueFormData')
-    return !saved
-  })
+  // Always skip the form on first launch
+  const [showForm, setShowForm] = useState(false)
   const [currentTime, setCurrentTime] = useState(new Date())
   const [showCountdown, setShowCountdown] = useState(false)
   const [prayerTimesData, setPrayerTimesData] = useState({})
@@ -176,15 +173,35 @@ function App() {
   const getPrayerIcon = (prayer) => {
     switch (prayer) {
       case 'imsaku':
-      case 'akshami':
       case 'jacia':
         return <Moon className="w-6 h-6" />
+      case 'akshami':
+        return <Sunset className="w-6 h-6" />
       case 'sunrise':
         return <Sunrise className="w-6 h-6" />
       default:
         return <Sun className="w-6 h-6" />
     }
   }
+
+  // Returns the key of the actual (ongoing) prayer
+  const getActualPrayer = () => {
+    const prayers = ['imsaku', 'sunrise', 'dreka', 'ikindia', 'akshami', 'jacia'];
+    const now = currentTime.getHours() * 60 + currentTime.getMinutes();
+    let lastPrayer = prayers[0];
+    for (let i = 0; i < prayers.length; i++) {
+      const t = prayerTimes[prayers[i]];
+      if (!t) continue;
+      const [h, m] = t.split(':').map(Number);
+      const mins = h * 60 + m;
+      if (now >= mins) {
+        lastPrayer = prayers[i];
+      } else {
+        break;
+      }
+    }
+    return lastPrayer;
+  };
 
   if (showForm) {
     return (
@@ -194,7 +211,7 @@ function App() {
         <Card className="w-full max-w-md relative z-10 shadow-2xl">
           <CardHeader>
             <CardTitle className="text-center text-xl flex items-center justify-center gap-2">
-              📝 Plotëso Formularin
+              📝 Plotësoni të dhënat e xhamisë
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -214,7 +231,7 @@ function App() {
               
               <div className="space-y-2">
                 <Label htmlFor="mosqueName" className="text-orange-600 font-semibold flex items-center gap-2">
-                  🕌 Emri i Xhamise:
+                  🕌 Emri i xhamisë:
                 </Label>
                 <Input
                   id="mosqueName"
@@ -234,7 +251,7 @@ function App() {
                   value={formData.location}
                   onChange={(e) => handleInputChange('location', e.target.value)}
                   className="border-teal-500 focus:border-teal-600 transition-colors"
-                  placeholder="Qyteti, shteti..."
+                  placeholder="Fshati, Qyteti..."
                 />
               </div>
               
@@ -270,7 +287,7 @@ function App() {
           console.log('Settings button clicked')
           setShowForm(true)
         }}
-        className="fixed top-6 right-6 z-50 p-3 bg-green-600 rounded-lg hover:bg-green-700 hover:scale-110 transition-all duration-300 shadow-lg hover:shadow-xl cursor-pointer border-2 border-green-500 hover:border-green-400"
+        className="fixed bottom-6 right-6 z-50 p-3 bg-green-600 rounded-lg hover:bg-green-700 hover:scale-110 transition-all duration-300 shadow-lg hover:shadow-xl cursor-pointer border-2 border-green-500 hover:border-green-400"
         style={{ pointerEvents: 'auto' }}
         title="Cilësimet - Kliko për të ndryshuar të dhënat"
       >
@@ -283,7 +300,7 @@ function App() {
         {/* Header - Dates */}
         <div className="flex justify-between items-start p-6 pt-8">
           <div className="bg-black/40 p-4 rounded-xl backdrop-blur-sm">
-            <div className="text-xl font-bold text-green-400 mb-1">📅 Data Gregoriane</div>
+            <div className="text-xl font-bold text-green-400 mb-1">📅 Data e sotme</div>
             <div className="text-2xl font-semibold">
               {formatAlbanianDate(currentTime)}
             </div>
@@ -303,16 +320,14 @@ function App() {
             <div className="text-8xl font-bold mb-2 text-shadow-xl tracking-wider">
               {currentTime.toLocaleTimeString('en-GB')}
             </div>
-            <div className="text-2xl font-medium opacity-90 text-shadow-lg">
-              Ora Aktuale
-            </div>
+            
           </div>
 
           {/* Quote or Countdown Section */}
           <div className="max-w-5xl w-full">
             {showCountdown ? (
               <div className="text-center bg-gradient-to-r from-yellow-600/80 to-orange-600/80 p-8 rounded-2xl backdrop-blur-enhanced border border-yellow-500/30 shadow-2xl prayer-glow tv-transition">
-                <div className="text-2xl font-medium mb-3 text-yellow-100 text-shadow-lg">⏰ Namazi i Ardhshëm</div>
+                <div className="text-2xl font-medium mb-3 text-yellow-100 text-shadow-lg">⏳ Vakti i ardhshëm</div>
                 <p className="text-4xl font-bold mb-2 text-white text-shadow-xl">
                   {nextPrayer.prayer}
                 </p>
@@ -336,78 +351,124 @@ function App() {
           </div>
         </div>
 
+        {/* Info Row - Mosque and Imam (moved above Prayer Times grid) */}
+        {(formData.mosqueName || formData.location || formData.imam) && (
+          <div className="flex justify-between items-start px-6 pb-2 w-full">
+            {/* Mosque Info */}
+            {(formData.mosqueName || formData.location) ? (
+              <div className="bg-black/50 p-4 rounded-xl backdrop-blur-sm border border-white/20 max-w-xs">
+                <div className="flex items-center space-x-3">
+                  <span className="text-2xl">🕌</span>
+                  <div>
+                    <div className="text-lg font-semibold text-green-400">Xhamia:</div>
+                    <div className="text-base">{formData.mosqueName}</div>
+                    {formData.location && <div className="text-sm opacity-80">{formData.location}</div>}
+                  </div>
+                </div>
+              </div>
+            ) : <div />}
+            {/* Imam Info */}
+            {formData.imam ? (
+              <div className="bg-black/50 p-4 rounded-xl backdrop-blur-sm border border-white/20 max-w-xs ml-auto">
+                <div className="flex items-center space-x-3">
+                  <span className="text-2xl">🎓</span>
+                  <div>
+                    <div className="text-lg font-semibold text-blue-400">Imami:</div>
+                    <div className="text-base">{formData.imam}</div>
+                  </div>
+                </div>
+              </div>
+            ) : <div />}
+          </div>
+        )}
+
         {/* Bottom - Prayer Times */}
         <div className="p-6 pb-8">
           <div className="bg-black/30 p-6 rounded-2xl backdrop-blur-enhanced border border-white/20">
             <h2 className="text-3xl font-bold text-center mb-6 text-green-400 text-shadow-lg">
-              🕌 Takvimi i Namazit
+              🕌 Vaktet e sotme
               {Object.keys(prayerTimesData).length > 0 && (
                 <span className="text-sm text-blue-300 ml-3">
-                  📊 CSV të ngarkuara ({Object.keys(prayerTimesData).length} ditë)
+                  ℹ️ Ezani i sabahut thirret 40 minuta para Lindjes së Diellit
                 </span>
               )}
             </h2>
             <div className="grid grid-cols-6 gap-6">
-              {Object.entries(prayerTimes).map(([prayer, time]) => {
-                const isCurrentPrayer = getCurrentPrayer() === prayer
-
+              {['imsaku', 'sunrise', 'dreka', 'ikindia', 'akshami', 'jacia'].map((prayer) => {
+                const time = prayerTimes[prayer];
+                const nextPrayerKey = getCurrentPrayer();
+                const actualPrayerKey = getActualPrayer();
+                const isNextPrayer = nextPrayerKey === prayer;
+                const isActualPrayer = actualPrayerKey === prayer;
+                let cardClass = 'text-center p-6 rounded-xl tv-transition ';
+                if (isNextPrayer) {
+                  cardClass += 'bg-gradient-to-b from-yellow-500/90 to-orange-600/90 scale-110 shadow-2xl border-2 border-yellow-300 gentle-pulse prayer-glow ';
+                } else if (isActualPrayer) {
+                  cardClass += 'bg-black/60 border-2 border-green-400 shadow-xl ';
+                } else {
+                  cardClass += 'bg-black/50 hover:bg-black/60 border border-white/20 ';
+                }
+                // Special rendering for Imsaku: show both Imsaku and Sabahu
+                if (prayer === 'imsaku') {
+                  return (
+                    <div key={prayer} className={cardClass}>
+                      <div className={`flex justify-center mb-3`}>
+                        <div className={`p-2 rounded-full ${isNextPrayer || isActualPrayer ? 'bg-white/20' : 'bg-white/10'}`}>
+                          {getPrayerIcon(prayer)}
+                        </div>
+                      </div>
+                      <div className={`text-lg font-bold mb-2 text-shadow-lg ${isNextPrayer || isActualPrayer ? 'text-white' : 'text-green-300'}`}>
+                        {prayerNames[prayer]}
+                      </div>
+                      <div className={`text-2xl font-bold text-shadow-lg ${isNextPrayer || isActualPrayer ? 'text-white' : 'text-white'}`}>
+                        {time}
+                        <div className="text-base font-semibold text-blue-200 mt-2">
+                          Sabahu: {prayerTimes.sabahu}
+                        </div>
+                      </div>
+                      {isNextPrayer && (
+                        <div className="text-sm font-medium mt-2 text-yellow-100 animate-pulse text-shadow-lg">
+                          ● I ARDHSHËM ●
+                        </div>
+                      )}
+                      {isActualPrayer && (
+                        <div className="text-sm font-medium mt-2 text-green-200 animate-pulse text-shadow-lg">
+                          ● AKTUAL ●
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+                // Default rendering for other prayers
                 return (
-                  <div
-                    key={prayer}
-                    className={`text-center p-6 rounded-xl tv-transition ${
-                      isCurrentPrayer
-                        ? 'bg-gradient-to-b from-yellow-500/90 to-orange-600/90 scale-110 shadow-2xl border-2 border-yellow-300 gentle-pulse prayer-glow'
-                        : 'bg-black/50 hover:bg-black/60 border border-white/20'
-                    }`}
-                  >
+                  <div key={prayer} className={cardClass}>
                     <div className="flex justify-center mb-3">
-                      <div className={`p-2 rounded-full ${isCurrentPrayer ? 'bg-white/20' : 'bg-white/10'}`}>
+                      <div className={`p-2 rounded-full ${isNextPrayer || isActualPrayer ? 'bg-white/20' : 'bg-white/10'}`}>
                         {getPrayerIcon(prayer)}
                       </div>
                     </div>
-                    <div className={`text-lg font-bold mb-2 text-shadow-lg ${isCurrentPrayer ? 'text-white' : 'text-green-300'}`}>
+                    <div className={`text-lg font-bold mb-2 text-shadow-lg ${isNextPrayer || isActualPrayer ? 'text-white' : 'text-green-300'}`}>
                       {prayerNames[prayer]}
                     </div>
-                    <div className={`text-2xl font-bold text-shadow-lg ${isCurrentPrayer ? 'text-white' : 'text-white'}`}>
+                    <div className={`text-2xl font-bold text-shadow-lg ${isNextPrayer || isActualPrayer ? 'text-white' : 'text-white'}`}>
                       {time}
                     </div>
-                    {isCurrentPrayer && (
+                    {isNextPrayer && (
                       <div className="text-sm font-medium mt-2 text-yellow-100 animate-pulse text-shadow-lg">
-                        ● AKTIVE ●
+                        ● I ARDHSHËM ●
+                      </div>
+                    )}
+                    {isActualPrayer && (
+                      <div className="text-sm font-medium mt-2 text-green-200 animate-pulse text-shadow-lg">
+                        ● AKTUAL ●
                       </div>
                     )}
                   </div>
-                )
+                );
               })}
             </div>
           </div>
         </div>
-
-        {/* Corner Info */}
-        {(formData.mosqueName || formData.location) && (
-          <div className="absolute bottom-6 left-6 bg-black/50 p-4 rounded-xl backdrop-blur-sm border border-white/20">
-            <div className="flex items-center space-x-3">
-              <span className="text-2xl">🕌</span>
-              <div>
-                <div className="text-lg font-semibold text-green-400">Xhamia</div>
-                <div className="text-base">{formData.mosqueName}</div>
-                {formData.location && <div className="text-sm opacity-80">{formData.location}</div>}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {formData.imam && (
-          <div className="absolute bottom-6 right-6 bg-black/50 p-4 rounded-xl backdrop-blur-sm border border-white/20">
-            <div className="flex items-center space-x-3">
-              <span className="text-2xl">🎓</span>
-              <div>
-                <div className="text-lg font-semibold text-blue-400">Imami</div>
-                <div className="text-base">{formData.imam}</div>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   )

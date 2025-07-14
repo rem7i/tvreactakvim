@@ -35,6 +35,7 @@ export const getTodaysPrayerTimes = (prayerData) => {
   if (todayData) {
     return {
       imsaku: todayData.imsaku,
+      sabahu: todayData.sabahu, // Add sabahu
       sunrise: todayData.sunrise,
       dreka: todayData.dreka,
       ikindia: todayData.ikindia,
@@ -46,6 +47,7 @@ export const getTodaysPrayerTimes = (prayerData) => {
   // Fallback times if date not found
   return {
     imsaku: '02:47',
+    sabahu: '03:15', // Fallback for sabahu
     sunrise: '04:59',
     dreka: '12:44',
     ikindia: '16:47',
