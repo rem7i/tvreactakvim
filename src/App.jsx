@@ -263,7 +263,9 @@ function App() {
                   placeholder="Fshati, Qyteti..."
                 />
               </div>
-              
+              <div className="text-sm text-gray-500">
+                Copyright © <a href="https://remzinura.com" className="text-blue-500 hover:text-blue-600">Remzi</a> - All rights reserved
+              </div>
               <Button type="submit" className="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-3 transition-colors">
                 ✅ Ruaje
               </Button>
