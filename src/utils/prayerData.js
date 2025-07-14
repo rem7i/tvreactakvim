@@ -75,7 +75,7 @@ export const albanianQuotes = [
     source: "Shura - Ajeti 43"
   },
   {
-    text: "Nuk ka ndodhur që të ketë ndonjë të pandëgjueshëm ndaj prindërve të tij, vetëmse e kemi gjetur të ishte arrogant, i palumtur. Pastaj e lexoi fjalën e Allahut të Lartësuar: \"Më ka bërë të mirësjellshëm ndaj nënës sime, e nuk më ka bërë kryelartë dhe as të pa lumtur (shekija)\"",
+    text: "Më ka bërë të mirësjellshëm ndaj nënës sime, e nuk më ka bërë kryelartë dhe as të palumtur.",
     source: "Merjem: 32"
   },
   {
@@ -122,7 +122,7 @@ export const formatAlbanianDate = (date) => {
   const month = albanianMonths[date.getMonth()]
   const year = date.getFullYear()
   
-  return `${day}, ${month} ${year} / ${dayName}`
+  return `${dayName}, ${day} ${month} ${year}`
 }
 
 // Prayer names in Albanian

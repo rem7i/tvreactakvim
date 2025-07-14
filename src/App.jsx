@@ -6,6 +6,16 @@ import { Switch } from '@/components/ui/switch.jsx'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.jsx'
 import { Settings, Sun, Moon, Sunset, Sunrise } from 'lucide-react'
 import mosqueBg from './assets/mosque-bg.jpg'
+
+// Dynamically import all wallpapers in wallpapers folder
+const wallpapers = import.meta.glob('./assets/wallpapers/*.jpg', { eager: true, import: 'default' });
+
+function getWallpaperForToday() {
+  const day = new Date().getDate();
+  // Try both with and without leading zero
+  const wallpaperKey = `./assets/wallpapers/${day}.jpg`;
+  return wallpapers[wallpaperKey] || mosqueBg;
+}
 import { albanianQuotes, formatAlbanianDate, prayerNames, loadPrayerTimesFromCSV, getTodaysPrayerTimes } from './utils/prayerData.js'
 import { formatIslamicDate } from './utils/hijri-converter.js'
 import './App.css'
@@ -29,8 +39,7 @@ function App() {
     return {
       imam: '',
       mosqueName: '',
-      location: '',
-      showIqamah: false
+      location: ''
     }
   })
 
@@ -255,15 +264,6 @@ function App() {
                 />
               </div>
               
-              <div className="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg">
-                <Switch
-                  id="showIqamah"
-                  checked={formData.showIqamah}
-                  onCheckedChange={(checked) => handleInputChange('showIqamah', checked)}
-                />
-                <Label htmlFor="showIqamah" className="font-medium">Shfaq Ikametin</Label>
-              </div>
-              
               <Button type="submit" className="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-3 transition-colors">
                 ✅ Ruaje
               </Button>
@@ -275,10 +275,10 @@ function App() {
   }
 
   const nextPrayer = getNextPrayerCountdown()
-
+  const todayWallpaper = getWallpaperForToday();
   return (
     <div className="min-h-screen bg-cover bg-center bg-no-repeat text-white relative overflow-hidden"
-         style={{backgroundImage: `url(${mosqueBg})`}}>
+         style={{backgroundImage: `url(${todayWallpaper})`}}>
       <div className="absolute inset-0 bg-black/50"></div>
 
       {/* Settings button */}
@@ -300,13 +300,11 @@ function App() {
         {/* Header - Dates */}
         <div className="flex justify-between items-start p-6 pt-8">
           <div className="bg-black/40 p-4 rounded-xl backdrop-blur-sm">
-            <div className="text-xl font-bold text-green-400 mb-1">📅 Data e sotme</div>
             <div className="text-2xl font-semibold">
               {formatAlbanianDate(currentTime)}
             </div>
           </div>
           <div className="bg-black/40 p-4 rounded-xl backdrop-blur-sm">
-            <div className="text-xl font-bold text-orange-400 mb-1">🌙 Data Hixhri</div>
             <div className="text-2xl font-semibold">
               {formatIslamicDate(currentTime)}
             </div>
@@ -338,7 +336,6 @@ function App() {
             ) : (
               <div className="bg-black/40 p-8 rounded-2xl backdrop-blur-enhanced border border-white/20 shadow-2xl tv-transition">
                 <div className="text-center">
-                  <div className="text-xl font-medium mb-4 text-blue-300 text-shadow-lg">📖 Ajeti i Ditës</div>
                   <p className="text-2xl leading-relaxed mb-6 text-white text-shadow-lg">
                     {currentQuote.text}
                   </p>
@@ -386,7 +383,7 @@ function App() {
         <div className="p-6 pb-8">
           <div className="bg-black/30 p-6 rounded-2xl backdrop-blur-enhanced border border-white/20">
             <h2 className="text-3xl font-bold text-center mb-6 text-green-400 text-shadow-lg">
-              🕌 Vaktet e sotme
+              🕝 Vaktet e sotme
               {Object.keys(prayerTimesData).length > 0 && (
                 <span className="text-sm text-blue-300 ml-3">
                   ℹ️ Ezani i sabahut thirret 40 minuta para Lindjes së Diellit
