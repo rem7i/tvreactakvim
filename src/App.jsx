@@ -282,11 +282,141 @@ function App() {
     <div className="min-h-screen bg-cover bg-center bg-no-repeat text-white relative overflow-hidden"
          style={{backgroundImage: `url(${todayWallpaper})`}}>
       <div className="absolute inset-0 bg-black/50"></div>
-
-      {/* Settings button */}
+      <div className="relative z-10 flex flex-col h-screen">
+        {/* Header - Dates */}
+        <div className="flex justify-between items-start px-6 pt-4 pb-2">
+          <div className="bg-black/10 p-4 rounded-xl backdrop-blur-sm">
+            <div className="text-2xl font-semibold">
+              {formatAlbanianDate(currentTime)}
+            </div>
+          </div>
+          <div className="bg-black/10 p-4 rounded-xl backdrop-blur-sm">
+            <div className="text-2xl font-semibold">
+              {formatIslamicDate(currentTime)}
+            </div>
+          </div>
+        </div>
+        {/* Center Content - Clock and Rotating Content */}
+        <div className="flex-1 flex flex-col justify-center items-center px-2">
+          <div className="text-center mb-4">
+            <div className="text-7xl font-bold mb-1 text-shadow-xl tracking-wider">
+              {currentTime.toLocaleTimeString('en-GB')}
+            </div>
+          </div>
+          <div className="max-w-4xl w-full">
+            {showCountdown ? (
+              <div className="text-center bg-gradient-to-r from-blue-600/80 to-green-600/80 w-full p-4 rounded-2xl backdrop-blur-enhanced border border-yellow-500/30 shadow-2xl prayer-glow tv-transition">
+                <div className="text-xl font-medium mb-2 text-yellow-100 text-shadow-lg">⏳ Vakti i ardhshëm</div>
+                <p className="text-3xl font-bold mb-1 text-white text-shadow-xl">
+                  {nextPrayer.prayer}
+                </p>
+                <p className="text-2xl font-semibold text-yellow-100 text-shadow-lg">
+                  edhe {nextPrayer.time}
+                </p>
+              </div>
+            ) : (
+              <div className="bg-black/40 p-4 rounded-2xl backdrop-blur-enhanced border border-white/20 shadow-2xl tv-transition">
+                <div className="text-center">
+                  <p className="text-xl leading-relaxed mb-3 text-white text-shadow-lg">
+                    {currentQuote.text}
+                  </p>
+                  <p className="text-lg opacity-80 text-blue-200 text-shadow-lg">
+                    ({currentQuote.source})
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+        {/* Info Row - Mosque and Imam (just above Prayer Times grid) */}
+        {(formData.mosqueName || formData.location || formData.imam) && (
+          <div className="flex justify-between items-center w-full px-8 pb-2">
+            <div className="text-green-300 font-semibold text-xl">
+              {formData.mosqueName && <>🕌 {formData.mosqueName}</>}
+              {formData.location && <span className="ml-2 text-white font-normal">{formData.location}</span>}
+            </div>
+            <div className="text-blue-300 font-semibold text-xl">
+              {formData.imam && <>🎓 {formData.imam}</>}
+            </div>
+          </div>
+        )}
+        {/* Bottom - Prayer Times */}
+        <div className="w-full flex justify-center pb-6">
+          <div className="bg-black/30 p-3 rounded-2xl backdrop-blur-enhanced border border-white/20 w-full">
+            <div className="flex flex-col items-center w-full">
+              
+              <div className="grid grid-cols-6 gap-6 w-full">
+                {['imsaku', 'sunrise', 'dreka', 'ikindia', 'akshami', 'jacia'].map((prayer) => {
+                  const time = prayerTimes[prayer];
+                  const nextPrayerKey = getCurrentPrayer();
+                  const actualPrayerKey = getActualPrayer();
+                  const isNextPrayer = nextPrayerKey === prayer;
+                  const isActualPrayer = actualPrayerKey === prayer;
+                  let cardClass = 'text-center p-6 rounded-xl tv-transition ';
+                  if (isNextPrayer) {
+                    cardClass += 'bg-gradient-to-b from-blue-500/90 to-green-600/90 scale-110 shadow-2xl border-2 border-yellow-300 gentle-pulse prayer-glow ';
+                  } else if (isActualPrayer) {
+                    cardClass += 'bg-black/60 border-2 border-green-400 shadow-xl ';
+                  } else {
+                    cardClass += 'bg-black/50 hover:bg-black/60 border border-white/20 ';
+                  }
+                  // Special rendering for Imsaku: show both Imsaku and Sabahu
+                  if (prayer === 'imsaku') {
+                    return (
+                      <div key={prayer} className={cardClass}>
+                        <div className={`flex justify-center mb-3`}>
+                          <div className={`p-2 rounded-full ${isNextPrayer || isActualPrayer ? 'bg-white/20' : 'bg-white/10'}`}>
+                            {getPrayerIcon(prayer)}
+                          </div>
+                        </div>
+                        <div className={`text-lg font-bold mb-2 text-shadow-lg ${isNextPrayer || isActualPrayer ? 'text-white' : 'text-green-300'}`}>
+                          {prayerNames[prayer]}
+                        </div>
+                        <div className={`text-2xl font-bold text-shadow-lg ${isNextPrayer || isActualPrayer ? 'text-white' : 'text-white'}`}>
+                          {time}
+                          <div className="text-base font-semibold text-blue-200 mt-2">
+                            Sabahu: {prayerTimes.sabahu}
+                          </div>
+                        </div>
+                        {isNextPrayer && (
+                          <div className="text-sm font-medium mt-2 text-yellow-100 animate-pulse text-shadow-lg">
+                            ● I ARDHSHËM ●
+                          </div>
+                        )}
+                        {isActualPrayer && (
+                          <div className="text-sm font-medium mt-2 text-green-200 animate-pulse text-shadow-lg">
+                            ● AKTUAL ●
+                          </div>
+                        )}
+                      </div>
+                    );
+                  }
+                  // Default rendering for other prayers
+                  return (
+                    <div key={prayer} className={cardClass}>
+                      <div className="flex justify-center mb-3">
+                        <div className={`p-2 rounded-full ${isNextPrayer || isActualPrayer ? 'bg-white/20' : 'bg-white/10'}`}>{getPrayerIcon(prayer)}</div>
+                      </div>
+                      <div className={`text-lg font-bold mb-2 text-shadow-lg ${isNextPrayer || isActualPrayer ? 'text-white' : 'text-green-300'}`}>{prayerNames[prayer]}</div>
+                      <div className={`text-2xl font-bold text-shadow-lg ${isNextPrayer || isActualPrayer ? 'text-white' : 'text-white'}`}>{time}</div>
+                      {isNextPrayer && (
+                        <div className="text-sm font-medium mt-2 text-yellow-100 animate-pulse text-shadow-lg">● I ARDHSHËM ●</div>
+                      )}
+                      {isActualPrayer && (
+                        <div className="text-sm font-medium mt-2 text-green-200 animate-pulse text-shadow-lg">● AKTUAL ●</div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* Settings button stays fixed at bottom right */}
       <button
         onClick={() => {
-          console.log('Settings button clicked')
           setShowForm(true)
         }}
         className="fixed bottom-6 right-6 z-50 p-3 bg-green-600 rounded-lg hover:bg-green-700 hover:scale-110 transition-all duration-300 shadow-lg hover:shadow-xl cursor-pointer border-2 border-green-500 hover:border-green-400"
@@ -295,173 +425,6 @@ function App() {
       >
         <Settings className="w-6 h-6" />
       </button>
-
-      {/* TV Layout Grid */}
-      <div className="relative z-10 h-screen flex flex-col">
-
-        {/* Header - Dates */}
-        <div className="flex justify-between items-start p-6 pt-8">
-          <div className="bg-black/40 p-4 rounded-xl backdrop-blur-sm">
-            <div className="text-2xl font-semibold">
-              {formatAlbanianDate(currentTime)}
-            </div>
-          </div>
-          <div className="bg-black/40 p-4 rounded-xl backdrop-blur-sm">
-            <div className="text-2xl font-semibold">
-              {formatIslamicDate(currentTime)}
-            </div>
-          </div>
-        </div>
-
-        {/* Center Content - Clock and Rotating Content */}
-        <div className="flex-1 flex flex-col justify-center items-center px-6">
-          {/* Large Clock */}
-          <div className="text-center mb-12">
-            <div className="text-8xl font-bold mb-2 text-shadow-xl tracking-wider">
-              {currentTime.toLocaleTimeString('en-GB')}
-            </div>
-            
-          </div>
-
-          {/* Quote or Countdown Section */}
-          <div className="max-w-5xl w-full">
-            {showCountdown ? (
-              <div className="text-center bg-gradient-to-r from-blue-600/80 to-green-600/80 p-8 rounded-2xl backdrop-blur-enhanced border border-yellow-500/30 shadow-2xl prayer-glow tv-transition">
-                <div className="text-2xl font-medium mb-3 text-yellow-100 text-shadow-lg">⏳ Vakti i ardhshëm</div>
-                <p className="text-4xl font-bold mb-2 text-white text-shadow-xl">
-                  {nextPrayer.prayer}
-                </p>
-                <p className="text-3xl font-semibold text-yellow-100 text-shadow-lg">
-                  edhe {nextPrayer.time}
-                </p>
-              </div>
-            ) : (
-              <div className="bg-black/40 p-8 rounded-2xl backdrop-blur-enhanced border border-white/20 shadow-2xl tv-transition">
-                <div className="text-center">
-                  <p className="text-2xl leading-relaxed mb-6 text-white text-shadow-lg">
-                    {currentQuote.text}
-                  </p>
-                  <p className="text-xl opacity-80 text-blue-200 text-shadow-lg">
-                    ({currentQuote.source})
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Info Row - Mosque and Imam (moved above Prayer Times grid) */}
-        {(formData.mosqueName || formData.location || formData.imam) && (
-          <div className="flex justify-between items-center px-6 pb-2 w-full">
-            {/* Mosque Info */}
-            {(formData.mosqueName || formData.location) ? (
-              <div className="bg-black/30 p-4 rounded-xl backdrop-blur-sm border border-white/20 max-w-xs">
-                <div className="flex items-center space-x-3">
-                  <span className="text-2xl">🕌</span>
-                  <div>
-                    
-                    <div className="text-base">{formData.mosqueName}</div>
-                    {formData.location && <div className="text-sm opacity-80">{formData.location}</div>}
-                  </div>
-                </div>
-              </div>
-            ) : <div />}
-            {/* Imam Info */}
-            {formData.imam ? (
-              <div className="bg-black/10 p-4 rounded-xl backdrop-blur-sm border border-white/20 max-w-xs ml-auto">
-                <div className="flex items-center space-x-3">
-                  <span className="text-2xl">🎓</span>
-                  <div>
-                    
-                    <div className="text-base">{formData.imam}</div>
-                  </div>
-                </div>
-              </div>
-            ) : <div />}
-          </div>
-        )}
-
-        {/* Bottom - Prayer Times */}
-        <div className="p-6 pb-8">
-          <div className="bg-black/30 p-6 rounded-2xl backdrop-blur-enhanced border border-white/20">
-            
-            <div className="grid grid-cols-6 gap-6">
-              {['imsaku', 'sunrise', 'dreka', 'ikindia', 'akshami', 'jacia'].map((prayer) => {
-                const time = prayerTimes[prayer];
-                const nextPrayerKey = getCurrentPrayer();
-                const actualPrayerKey = getActualPrayer();
-                const isNextPrayer = nextPrayerKey === prayer;
-                const isActualPrayer = actualPrayerKey === prayer;
-                let cardClass = 'text-center p-6 rounded-xl tv-transition ';
-                if (isNextPrayer) {
-                  cardClass += 'bg-gradient-to-b from-blue-500/90 to-green-600/90 scale-110 shadow-2xl border-2 border-yellow-300 gentle-pulse prayer-glow ';
-                } else if (isActualPrayer) {
-                  cardClass += 'bg-black/60 border-2 border-green-400 shadow-xl ';
-                } else {
-                  cardClass += 'bg-black/50 hover:bg-black/60 border border-white/20 ';
-                }
-                // Special rendering for Imsaku: show both Imsaku and Sabahu
-                if (prayer === 'imsaku') {
-                  return (
-                    <div key={prayer} className={cardClass}>
-                      <div className={`flex justify-center mb-3`}>
-                        <div className={`p-2 rounded-full ${isNextPrayer || isActualPrayer ? 'bg-white/20' : 'bg-white/10'}`}>
-                          {getPrayerIcon(prayer)}
-                        </div>
-                      </div>
-                      <div className={`text-lg font-bold mb-2 text-shadow-lg ${isNextPrayer || isActualPrayer ? 'text-white' : 'text-green-300'}`}>
-                        {prayerNames[prayer]}
-                      </div>
-                      <div className={`text-2xl font-bold text-shadow-lg ${isNextPrayer || isActualPrayer ? 'text-white' : 'text-white'}`}>
-                        {time}
-                        <div className="text-base font-semibold text-blue-200 mt-2">
-                          Sabahu: {prayerTimes.sabahu}
-                        </div>
-                      </div>
-                      {isNextPrayer && (
-                        <div className="text-sm font-medium mt-2 text-blue-100 animate-pulse text-shadow-lg">
-                          ● I ARDHSHËM ●
-                        </div>
-                      )}
-                      {isActualPrayer && (
-                        <div className="text-sm font-medium mt-2 text-green-200 animate-pulse text-shadow-lg">
-                          ● AKTUAL ●
-                        </div>
-                      )}
-                    </div>
-                  );
-                }
-                // Default rendering for other prayers
-                return (
-                  <div key={prayer} className={cardClass}>
-                    <div className="flex justify-center mb-3">
-                      <div className={`p-2 rounded-full ${isNextPrayer || isActualPrayer ? 'bg-white/20' : 'bg-white/10'}`}>
-                        {getPrayerIcon(prayer)}
-                      </div>
-                    </div>
-                    <div className={`text-lg font-bold mb-2 text-shadow-lg ${isNextPrayer || isActualPrayer ? 'text-white' : 'text-green-300'}`}>
-                      {prayerNames[prayer]}
-                    </div>
-                    <div className={`text-2xl font-bold text-shadow-lg ${isNextPrayer || isActualPrayer ? 'text-white' : 'text-white'}`}>
-                      {time}
-                    </div>
-                    {isNextPrayer && (
-                      <div className="text-sm font-medium mt-2 text-blue-100 animate-pulse text-shadow-lg">
-                        ● I ARDHSHËM ●
-                      </div>
-                    )}
-                    {isActualPrayer && (
-                      <div className="text-sm font-medium mt-2 text-green-200 animate-pulse text-shadow-lg">
-                        ● AKTUAL ●
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   )
 }
