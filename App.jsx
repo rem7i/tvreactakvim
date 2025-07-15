@@ -10,14 +10,12 @@ import mosqueBg from './assets/mosque-bg.jpg'
 // Dynamically import all wallpapers in wallpapers folder
 const wallpapers = import.meta.glob('./assets/wallpapers/*.jpg', { eager: true, import: 'default' });
 
-function getRandomWallpaper() {
-  const wallpaperKeys = Object.keys(wallpapers);
-  if (wallpaperKeys.length === 0) return mosqueBg;
-  
-  const randomKey = wallpaperKeys[Math.floor(Math.random() * wallpaperKeys.length)];
-  return wallpapers[randomKey] || mosqueBg;
+function getWallpaperForToday() {
+  const day = new Date().getDate();
+  // Try both with and without leading zero
+  const wallpaperKey = `./assets/wallpapers/${day}.jpg`;
+  return wallpapers[wallpaperKey] || mosqueBg;
 }
-
 import { albanianQuotes, formatAlbanianDate, prayerNames, loadPrayerTimesFromCSV, getTodaysPrayerTimes } from './utils/prayerData.js'
 import { formatIslamicDate } from './utils/hijri-converter.js'
 import './App.css'
@@ -28,7 +26,6 @@ function App() {
   const [currentTime, setCurrentTime] = useState(new Date())
   const [showCountdown, setShowCountdown] = useState(false)
   const [prayerTimesData, setPrayerTimesData] = useState({})
-  const [currentWallpaper, setCurrentWallpaper] = useState(() => getRandomWallpaper())
   const [formData, setFormData] = useState(() => {
     // Try to load saved data from localStorage
     const saved = localStorage.getItem('mosqueFormData')
@@ -80,15 +77,6 @@ function App() {
     }, 1000)
 
     return () => clearInterval(timer)
-  }, [])
-
-  // Change wallpaper every 24 hours
-  useEffect(() => {
-    const wallpaperTimer = setInterval(() => {
-      setCurrentWallpaper(getRandomWallpaper())
-    }, 86400000) // 24 hours
-
-    return () => clearInterval(wallpaperTimer)
   }, [])
 
   // Rotate quotes and countdown every 15 seconds
@@ -289,9 +277,10 @@ function App() {
   }
 
   const nextPrayer = getNextPrayerCountdown()
+  const todayWallpaper = getWallpaperForToday();
   return (
     <div className="min-h-screen bg-cover bg-center bg-no-repeat text-white relative overflow-hidden"
-         style={{backgroundImage: `url(${currentWallpaper})`}}>
+         style={{backgroundImage: `url(${todayWallpaper})`}}>
       <div className="absolute inset-0 bg-black/50"></div>
       <div className="relative z-10 flex flex-col h-screen">
         {/* Header - Dates */}
