@@ -264,7 +264,7 @@ function App() {
                 />
               </div>
               <div className="text-sm text-gray-500">
-                Copyright © <a href="https://remzinura.com" className="text-blue-500 hover:text-blue-600">Remzi</a> - All rights reserved
+                Copyright © <a href="https://takvimi.app" className="text-blue-500 hover:text-blue-600">Takvimi.app</a> - All rights reserved
               </div>
               <Button type="submit" className="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-3 transition-colors">
                 ✅ Ruaje
@@ -326,7 +326,7 @@ function App() {
           {/* Quote or Countdown Section */}
           <div className="max-w-5xl w-full">
             {showCountdown ? (
-              <div className="text-center bg-gradient-to-r from-yellow-600/80 to-orange-600/80 p-8 rounded-2xl backdrop-blur-enhanced border border-yellow-500/30 shadow-2xl prayer-glow tv-transition">
+              <div className="text-center bg-gradient-to-r from-blue-600/80 to-green-600/80 p-8 rounded-2xl backdrop-blur-enhanced border border-yellow-500/30 shadow-2xl prayer-glow tv-transition">
                 <div className="text-2xl font-medium mb-3 text-yellow-100 text-shadow-lg">⏳ Vakti i ardhshëm</div>
                 <p className="text-4xl font-bold mb-2 text-white text-shadow-xl">
                   {nextPrayer.prayer}
@@ -352,14 +352,14 @@ function App() {
 
         {/* Info Row - Mosque and Imam (moved above Prayer Times grid) */}
         {(formData.mosqueName || formData.location || formData.imam) && (
-          <div className="flex justify-between items-start px-6 pb-2 w-full">
+          <div className="flex justify-between items-center px-6 pb-2 w-full">
             {/* Mosque Info */}
             {(formData.mosqueName || formData.location) ? (
-              <div className="bg-black/50 p-4 rounded-xl backdrop-blur-sm border border-white/20 max-w-xs">
+              <div className="bg-black/30 p-4 rounded-xl backdrop-blur-sm border border-white/20 max-w-xs">
                 <div className="flex items-center space-x-3">
                   <span className="text-2xl">🕌</span>
                   <div>
-                    <div className="text-lg font-semibold text-green-400">Xhamia:</div>
+                    
                     <div className="text-base">{formData.mosqueName}</div>
                     {formData.location && <div className="text-sm opacity-80">{formData.location}</div>}
                   </div>
@@ -368,11 +368,11 @@ function App() {
             ) : <div />}
             {/* Imam Info */}
             {formData.imam ? (
-              <div className="bg-black/50 p-4 rounded-xl backdrop-blur-sm border border-white/20 max-w-xs ml-auto">
+              <div className="bg-black/10 p-4 rounded-xl backdrop-blur-sm border border-white/20 max-w-xs ml-auto">
                 <div className="flex items-center space-x-3">
                   <span className="text-2xl">🎓</span>
                   <div>
-                    <div className="text-lg font-semibold text-blue-400">Imami:</div>
+                    
                     <div className="text-base">{formData.imam}</div>
                   </div>
                 </div>
@@ -384,14 +384,7 @@ function App() {
         {/* Bottom - Prayer Times */}
         <div className="p-6 pb-8">
           <div className="bg-black/30 p-6 rounded-2xl backdrop-blur-enhanced border border-white/20">
-            <h2 className="text-3xl font-bold text-center mb-6 text-green-400 text-shadow-lg">
-              🕝 Vaktet e sotme
-              {Object.keys(prayerTimesData).length > 0 && (
-                <span className="text-sm text-blue-300 ml-3">
-                  ℹ️ Ezani i sabahut thirret 40 minuta para Lindjes së Diellit
-                </span>
-              )}
-            </h2>
+            
             <div className="grid grid-cols-6 gap-6">
               {['imsaku', 'sunrise', 'dreka', 'ikindia', 'akshami', 'jacia'].map((prayer) => {
                 const time = prayerTimes[prayer];
@@ -401,7 +394,7 @@ function App() {
                 const isActualPrayer = actualPrayerKey === prayer;
                 let cardClass = 'text-center p-6 rounded-xl tv-transition ';
                 if (isNextPrayer) {
-                  cardClass += 'bg-gradient-to-b from-yellow-500/90 to-orange-600/90 scale-110 shadow-2xl border-2 border-yellow-300 gentle-pulse prayer-glow ';
+                  cardClass += 'bg-gradient-to-b from-blue-500/90 to-green-600/90 scale-110 shadow-2xl border-2 border-yellow-300 gentle-pulse prayer-glow ';
                 } else if (isActualPrayer) {
                   cardClass += 'bg-black/60 border-2 border-green-400 shadow-xl ';
                 } else {
@@ -426,7 +419,7 @@ function App() {
                         </div>
                       </div>
                       {isNextPrayer && (
-                        <div className="text-sm font-medium mt-2 text-yellow-100 animate-pulse text-shadow-lg">
+                        <div className="text-sm font-medium mt-2 text-blue-100 animate-pulse text-shadow-lg">
                           ● I ARDHSHËM ●
                         </div>
                       )}
@@ -453,7 +446,7 @@ function App() {
                       {time}
                     </div>
                     {isNextPrayer && (
-                      <div className="text-sm font-medium mt-2 text-yellow-100 animate-pulse text-shadow-lg">
+                      <div className="text-sm font-medium mt-2 text-blue-100 animate-pulse text-shadow-lg">
                         ● I ARDHSHËM ●
                       </div>
                     )}
