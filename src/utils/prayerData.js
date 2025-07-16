@@ -72,7 +72,42 @@ export const loadPrayerTimesFromCSV = async () => {
   }
 }
 
-// Albanian quotes and verses
+// Function to parse quotes CSV
+export const parseQuotesCSV = (csvText) => {
+  const lines = csvText.trim().split('\n')
+  const quotes = []
+
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i]
+    if (!line || line.trim() === '') continue
+
+    // Handle CSV parsing with quoted text containing commas
+    const match = line.match(/^"([^"]+)",(.+)$/)
+    if (match) {
+      quotes.push({
+        text: match[1],
+        source: match[2]
+      })
+    }
+  }
+
+  return quotes
+}
+
+// Function to load quotes from CSV
+export const loadQuotesFromCSV = async () => {
+  try {
+    const response = await fetch('/quotes.csv')
+    const csvText = await response.text()
+    return parseQuotesCSV(csvText)
+  } catch (error) {
+    console.error('Error loading quotes CSV:', error)
+    // Return fallback quotes if CSV fails to load
+    return albanianQuotes
+  }
+}
+
+// Keep the original quotes as fallback
 export const albanianQuotes = [
   {
     text: "Kushdo që duron dhe fal, ta dijë se, në të vërtetë, këto janë nga veprimet më të virtytshme.",

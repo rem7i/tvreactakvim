@@ -25,7 +25,7 @@ function getRandomWallpaper() {
   return wallpapers[wallpaperKeys[randomIndex]] || mosqueBg;
 }
 
-import { albanianQuotes, formatAlbanianDate, prayerNames, loadPrayerTimesFromCSV, getTodaysPrayerTimes } from './utils/prayerData.js'
+import { albanianQuotes, formatAlbanianDate, prayerNames, loadPrayerTimesFromCSV, getTodaysPrayerTimes, loadQuotesFromCSV } from './utils/prayerData.js'
 import { formatIslamicDate } from './utils/hijri-converter.js'
 import './App.css'
 
@@ -64,6 +64,7 @@ function App() {
   }, [prayerTimes])
 
   const [currentQuote, setCurrentQuote] = useState(albanianQuotes[0])
+  const [quotesData, setQuotesData] = useState(albanianQuotes)
 
   // Load prayer times from CSV on component mount
   useEffect(() => {
@@ -78,6 +79,23 @@ function App() {
     }
 
     loadPrayerTimes()
+  }, [])
+
+  // Load quotes from CSV on component mount
+  useEffect(() => {
+    const loadQuotes = async () => {
+      try {
+        const quotes = await loadQuotesFromCSV()
+        setQuotesData(quotes)
+        setCurrentQuote(quotes[0] || albanianQuotes[0])
+        console.log('Quotes loaded from CSV:', quotes.length, 'quotes')
+      } catch (error) {
+        console.error('Failed to load quotes:', error)
+        setQuotesData(albanianQuotes)
+      }
+    }
+
+    loadQuotes()
   }, [])
 
   // Update current time every second - ALWAYS use Tirane timezone
@@ -99,23 +117,23 @@ function App() {
     return () => clearInterval(wallpaperTimer)
   }, [])
 
-  // Rotate quotes and countdown every 15 seconds
+  // Rotate quotes and countdown every 60 seconds
   useEffect(() => {
     const contentTimer = setInterval(() => {
       setShowCountdown(prev => {
         if (!prev) {
-          // Show countdown for 15 seconds
+          // Show countdown for 60 seconds
           return true
         } else {
-          // Show quote for 15 seconds and rotate to next quote
-          setCurrentQuote(albanianQuotes[Math.floor(Math.random() * albanianQuotes.length)])
+          // Show quote for 60 seconds and rotate to next quote
+          setCurrentQuote(quotesData[Math.floor(Math.random() * quotesData.length)])
           return false
         }
       })
-    }, 15000)
+    }, 60000)
 
     return () => clearInterval(contentTimer)
-  }, [])
+  }, [quotesData])
 
   const handleFormSubmit = (e) => {
     e.preventDefault()
