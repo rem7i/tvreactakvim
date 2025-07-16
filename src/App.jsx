@@ -6,6 +6,7 @@ import { Switch } from '@/components/ui/switch.jsx'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.jsx'
 import { Settings, Sun, Moon, Sunset, Sunrise } from 'lucide-react'
 import mosqueBg from './assets/mosque-bg.jpg'
+import { DateTime } from 'luxon'
 
 // Dynamically import all wallpapers in wallpapers folder
 const wallpapers = import.meta.glob('./assets/wallpapers/*.jpg', { eager: true, import: 'default' });
@@ -31,7 +32,7 @@ import './App.css'
 function App() {
   // Always skip the form on first launch
   const [showForm, setShowForm] = useState(false)
-  const [currentTime, setCurrentTime] = useState(new Date())
+  const [currentTime, setCurrentTime] = useState(DateTime.now().setZone('Europe/Tirane'))
   const [showCountdown, setShowCountdown] = useState(false)
   const [prayerTimesData, setPrayerTimesData] = useState({})
   const [currentWallpaper, setCurrentWallpaper] = useState(() => getRandomWallpaper())
@@ -82,11 +83,8 @@ function App() {
   // Update current time every second - ALWAYS use Tirane timezone
   useEffect(() => {
     const timer = setInterval(() => {
-      // Create date in Tirane timezone
-      const tiraneTime = new Date().toLocaleString("en-US", {
-        timeZone: "Europe/Tirane"
-      });
-      setCurrentTime(new Date(tiraneTime))
+      // Create date in Tirane timezone using Luxon
+      setCurrentTime(DateTime.now().setZone('Europe/Tirane'))
     }, 1000)
 
     return () => clearInterval(timer)
@@ -139,7 +137,7 @@ function App() {
   }
 
   const getCurrentPrayer = () => {
-    const now = currentTime.getHours() * 60 + currentTime.getMinutes()
+    const now = currentTime.hour * 60 + currentTime.minute
     const times = [
       { name: 'imsaku', time: prayerTimes.imsaku },
       { name: 'sunrise', time: prayerTimes.sunrise },
@@ -162,7 +160,7 @@ function App() {
   }
 
   const getNextPrayerCountdown = () => {
-    const now = currentTime.getHours() * 60 + currentTime.getMinutes()
+    const now = currentTime.hour * 60 + currentTime.minute
     const times = [
       { name: 'imsaku', time: prayerTimes.imsaku, label: prayerNames.imsaku },
       { name: 'sunrise', time: prayerTimes.sunrise, label: prayerNames.sunrise },
@@ -218,7 +216,7 @@ function App() {
   // Returns the key of the actual (ongoing) prayer
   const getActualPrayer = () => {
     const prayers = ['imsaku', 'sunrise', 'dreka', 'ikindia', 'akshami', 'jacia'];
-    const now = currentTime.getHours() * 60 + currentTime.getMinutes();
+    const now = currentTime.hour * 60 + currentTime.minute;
     let lastPrayer = prayers[0];
     for (let i = 0; i < prayers.length; i++) {
       const t = prayerTimes[prayers[i]];
@@ -321,7 +319,7 @@ function App() {
         <div className="flex-1 flex flex-col justify-center items-center px-2">
           <div className="text-center mb-4">
             <div className="text-7xl font-bold mb-1 text-shadow-xl tracking-wider">
-              {currentTime.toLocaleTimeString('en-GB')}
+              {currentTime.toFormat('HH:mm:ss')}
             </div>
           </div>
           <div className="max-w-4xl w-full">

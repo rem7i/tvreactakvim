@@ -1,5 +1,7 @@
 // Prayer times utility functions
 
+import { DateTime } from 'luxon'
+
 export const parsePrayerTimesCSV = (csvText) => {
   const lines = csvText.trim().split('\n')
   const headers = lines[0].split(',')
@@ -30,9 +32,7 @@ export const parsePrayerTimesCSV = (csvText) => {
 
 export const getTodaysPrayerTimes = (prayerData) => {
   // Always use Tirane timezone for date calculation
-  const today = new Date().toLocaleDateString("en-CA", {
-    timeZone: "Europe/Tirane"
-  }); // Returns YYYY-MM-DD format
+  const today = DateTime.now().setZone('Europe/Tirane').toFormat('yyyy-MM-dd');
   
   const todayData = prayerData[today]
 
@@ -121,12 +121,27 @@ export const albanianDays = ['E Diel', 'E Hënë', 'E Martë', 'E Mërkurë', 'E
 export const albanianMonths = ['Janar', 'Shkurt', 'Mars', 'Prill', 'Maj', 'Qershor', 'Korrik', 'Gusht', 'Shtator', 'Tetor', 'Nëntor', 'Dhjetor']
 
 export const formatAlbanianDate = (date) => {
-  const dayName = albanianDays[date.getDay()]
-  const day = date.getDate()
-  const month = albanianMonths[date.getMonth()]
-  const year = date.getFullYear()
+  // Handle both Luxon DateTime and regular Date objects
+  let dayIndex, day, monthIndex, year;
   
-  return `${dayName}, ${day} ${month} ${year}`
+  if (date.weekday !== undefined) {
+    // Luxon DateTime object
+    dayIndex = date.weekday === 7 ? 0 : date.weekday; // Luxon: 1=Monday, 7=Sunday; JS: 0=Sunday, 6=Saturday
+    day = date.day;
+    monthIndex = date.month - 1; // Luxon months are 1-based, array is 0-based
+    year = date.year;
+  } else {
+    // Regular JavaScript Date object
+    dayIndex = date.getDay();
+    day = date.getDate();
+    monthIndex = date.getMonth();
+    year = date.getFullYear();
+  }
+  
+  const dayName = albanianDays[dayIndex];
+  const month = albanianMonths[monthIndex];
+  
+  return `${dayName}, ${day} ${month} ${year}`;
 }
 
 // Prayer names in Albanian
