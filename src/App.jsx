@@ -6,7 +6,6 @@ import { Switch } from '@/components/ui/switch.jsx'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.jsx'
 import { Settings, Sun, Moon, Sunset, Sunrise } from 'lucide-react'
 import mosqueBg from './assets/mosque-bg.jpg'
-import { DateTime } from 'luxon'
 
 // Dynamically import all wallpapers in wallpapers folder
 const wallpapers = import.meta.glob('./assets/wallpapers/*.jpg', { eager: true, import: 'default' });
@@ -15,14 +14,8 @@ function getRandomWallpaper() {
   const wallpaperKeys = Object.keys(wallpapers);
   if (wallpaperKeys.length === 0) return mosqueBg;
   
-  // Use Tirane timezone for consistent daily selection
-  const tiraneDate = new Date().toLocaleDateString("en-US", {
-    timeZone: "Europe/Tirane"
-  });
-  const seed = tiraneDate.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const randomIndex = seed % wallpaperKeys.length;
-  
-  return wallpapers[wallpaperKeys[randomIndex]] || mosqueBg;
+  const randomKey = wallpaperKeys[Math.floor(Math.random() * wallpaperKeys.length)];
+  return wallpapers[randomKey] || mosqueBg;
 }
 
 import { albanianQuotes, formatAlbanianDate, prayerNames, loadPrayerTimesFromCSV, getTodaysPrayerTimes, loadQuotesFromCSV } from './utils/prayerData.js'
@@ -32,7 +25,7 @@ import './App.css'
 function App() {
   // Always skip the form on first launch
   const [showForm, setShowForm] = useState(false)
-  const [currentTime, setCurrentTime] = useState(DateTime.now().setZone('Europe/Tirane'))
+  const [currentTime, setCurrentTime] = useState(new Date())
   const [showCountdown, setShowCountdown] = useState(false)
   const [prayerTimesData, setPrayerTimesData] = useState({})
   const [currentWallpaper, setCurrentWallpaper] = useState(() => getRandomWallpaper())
@@ -59,7 +52,7 @@ function App() {
   // Debug: Log today's prayer times
   useEffect(() => {
     const today = new Date().toISOString().split('T')[0]
-    console.log('Tv6oday:', today)
+    console.log('Today:', today)
     console.log('Prayer times for today:', prayerTimes)
   }, [prayerTimes])
 
@@ -98,11 +91,10 @@ function App() {
     loadQuotes()
   }, [])
 
-  // Update current time every second - ALWAYS use Tirane timezone
+  // Update current time every second
   useEffect(() => {
     const timer = setInterval(() => {
-      // Create date in Tirane timezone using Luxon
-      setCurrentTime(DateTime.now().setZone('Europe/Tirane'))
+      setCurrentTime(new Date())
     }, 1000)
 
     return () => clearInterval(timer)
@@ -117,20 +109,18 @@ function App() {
     return () => clearInterval(wallpaperTimer)
   }, [])
 
-  // Rotate quotes and countdown every 60 seconds
+  // Rotate quotes and countdown every 15 seconds
   useEffect(() => {
     const contentTimer = setInterval(() => {
       setShowCountdown(prev => {
         if (!prev) {
-          // Show countdown for 60 seconds
           return true
         } else {
-          // Show quote for 60 seconds and rotate to next quote
           setCurrentQuote(quotesData[Math.floor(Math.random() * quotesData.length)])
           return false
         }
       })
-    }, 60000)
+    }, 15000)
 
     return () => clearInterval(contentTimer)
   }, [quotesData])
@@ -155,7 +145,7 @@ function App() {
   }
 
   const getCurrentPrayer = () => {
-    const now = currentTime.hour * 60 + currentTime.minute
+    const now = currentTime.getHours() * 60 + currentTime.getMinutes()
     const times = [
       { name: 'imsaku', time: prayerTimes.imsaku },
       { name: 'sunrise', time: prayerTimes.sunrise },
@@ -178,7 +168,7 @@ function App() {
   }
 
   const getNextPrayerCountdown = () => {
-    const now = currentTime.hour * 60 + currentTime.minute
+    const now = currentTime.getHours() * 60 + currentTime.getMinutes()
     const times = [
       { name: 'imsaku', time: prayerTimes.imsaku, label: prayerNames.imsaku },
       { name: 'sunrise', time: prayerTimes.sunrise, label: prayerNames.sunrise },
@@ -234,7 +224,7 @@ function App() {
   // Returns the key of the actual (ongoing) prayer
   const getActualPrayer = () => {
     const prayers = ['imsaku', 'sunrise', 'dreka', 'ikindia', 'akshami', 'jacia'];
-    const now = currentTime.hour * 60 + currentTime.minute;
+    const now = currentTime.getHours() * 60 + currentTime.getMinutes();
     let lastPrayer = prayers[0];
     for (let i = 0; i < prayers.length; i++) {
       const t = prayerTimes[prayers[i]];
@@ -337,7 +327,7 @@ function App() {
         <div className="flex-1 flex flex-col justify-center items-center px-2">
           <div className="text-center mb-4">
             <div className="text-7xl font-bold mb-1 text-shadow-xl tracking-wider">
-              {currentTime.toFormat('HH:mm:ss')}
+              {currentTime.toLocaleTimeString('en-GB')}
             </div>
           </div>
           <div className="max-w-4xl w-full">
