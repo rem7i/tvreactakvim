@@ -29,7 +29,11 @@ export const parsePrayerTimesCSV = (csvText) => {
 }
 
 export const getTodaysPrayerTimes = (prayerData) => {
-  const today = new Date().toISOString().split('T')[0]
+  // Always use Tirane timezone for date calculation
+  const today = new Date().toLocaleDateString("en-CA", {
+    timeZone: "Europe/Tirane"
+  }); // Returns YYYY-MM-DD format
+  
   const todayData = prayerData[today]
 
   if (todayData) {

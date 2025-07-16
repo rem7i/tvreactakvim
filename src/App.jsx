@@ -14,8 +14,14 @@ function getRandomWallpaper() {
   const wallpaperKeys = Object.keys(wallpapers);
   if (wallpaperKeys.length === 0) return mosqueBg;
   
-  const randomKey = wallpaperKeys[Math.floor(Math.random() * wallpaperKeys.length)];
-  return wallpapers[randomKey] || mosqueBg;
+  // Use Tirane timezone for consistent daily selection
+  const tiraneDate = new Date().toLocaleDateString("en-US", {
+    timeZone: "Europe/Tirane"
+  });
+  const seed = tiraneDate.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const randomIndex = seed % wallpaperKeys.length;
+  
+  return wallpapers[wallpaperKeys[randomIndex]] || mosqueBg;
 }
 
 import { albanianQuotes, formatAlbanianDate, prayerNames, loadPrayerTimesFromCSV, getTodaysPrayerTimes } from './utils/prayerData.js'
@@ -52,7 +58,7 @@ function App() {
   // Debug: Log today's prayer times
   useEffect(() => {
     const today = new Date().toISOString().split('T')[0]
-    console.log('Today:', today)
+    console.log('Tv6oday:', today)
     console.log('Prayer times for today:', prayerTimes)
   }, [prayerTimes])
 
@@ -73,20 +79,24 @@ function App() {
     loadPrayerTimes()
   }, [])
 
-  // Update current time every second
+  // Update current time every second - ALWAYS use Tirane timezone
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentTime(new Date())
+      // Create date in Tirane timezone
+      const tiraneTime = new Date().toLocaleString("en-US", {
+        timeZone: "Europe/Tirane"
+      });
+      setCurrentTime(new Date(tiraneTime))
     }, 1000)
 
     return () => clearInterval(timer)
   }, [])
 
-  // Change wallpaper every 24 hours
+  // Change wallpaper every 12 hours
   useEffect(() => {
     const wallpaperTimer = setInterval(() => {
       setCurrentWallpaper(getRandomWallpaper())
-    }, 86400000) // 24 hours
+    }, 43200000) // 12 hours
 
     return () => clearInterval(wallpaperTimer)
   }, [])
