@@ -79,20 +79,20 @@ function App() {
     return () => clearInterval(timer)
   }, [])
 
-  // Rotate quotes and countdown every 15 seconds
+  // Rotate quotes and countdown every 55 seconds
   useEffect(() => {
     const contentTimer = setInterval(() => {
       setShowCountdown(prev => {
         if (!prev) {
-          // Show countdown for 15 seconds
+          // Show countdown for 55 seconds
           return true
         } else {
-          // Show quote for 15 seconds and rotate to next quote
+          // Show quote for 55 seconds and rotate to next quote
           setCurrentQuote(albanianQuotes[Math.floor(Math.random() * albanianQuotes.length)])
           return false
         }
       })
-    }, 15000)
+    }, 55000)
 
     return () => clearInterval(contentTimer)
   }, [])
@@ -305,7 +305,7 @@ function App() {
           </div>
           <div className="max-w-4xl w-full">
             {showCountdown ? (
-              <div className="text-center bg-gradient-to-r from-blue-600/80 to-green-600/80 w-full p-4 rounded-2xl backdrop-blur-enhanced border border-yellow-500/30 shadow-2xl prayer-glow tv-transition">
+              <div className="text-center bg-gradient-to-r from-blue-600/70 to-green-600/30 w-full p-4 rounded-2xl backdrop-blur-enhanced border border-yellow-500/30 shadow-2xl prayer-glow tv-transition">
                 <div className="text-xl font-medium mb-2 text-yellow-100 text-shadow-lg">⏳ Vakti i ardhshëm</div>
                 <p className="text-3xl font-bold mb-1 text-white text-shadow-xl">
                   {nextPrayer.prayer}
@@ -342,7 +342,7 @@ function App() {
         )}
         {/* Bottom - Prayer Times */}
         <div className="w-full flex justify-center pb-6">
-          <div className="bg-black/30 p-3 rounded-2xl backdrop-blur-enhanced border border-white/20 w-full">
+          <div className="bg-black/15 p-3 rounded-2xl backdrop-blur-enhanced border border-white/20 w-full">
             <div className="flex flex-col items-center w-full">
               
               <div className="grid grid-cols-6 gap-6 w-full">
@@ -372,7 +372,7 @@ function App() {
                         <div className={`text-lg font-bold mb-2 text-shadow-lg ${isNextPrayer || isActualPrayer ? 'text-white' : 'text-green-300'}`}>
                           {prayerNames[prayer]}
                         </div>
-                        <div className={`text-2xl font-bold text-shadow-lg ${isNextPrayer || isActualPrayer ? 'text-white' : 'text-white'}`}>
+                        <div className={`text-6xl font-extrabold text-shadow-lg ${isNextPrayer || isActualPrayer ? 'text-white' : 'text-white'}`}>
                           {time}
                           <div className="text-base font-semibold text-blue-200 mt-2">
                             Sabahu: {prayerTimes.sabahu}
@@ -398,7 +398,7 @@ function App() {
                         <div className={`p-2 rounded-full ${isNextPrayer || isActualPrayer ? 'bg-white/20' : 'bg-white/10'}`}>{getPrayerIcon(prayer)}</div>
                       </div>
                       <div className={`text-lg font-bold mb-2 text-shadow-lg ${isNextPrayer || isActualPrayer ? 'text-white' : 'text-green-300'}`}>{prayerNames[prayer]}</div>
-                      <div className={`text-2xl font-bold text-shadow-lg ${isNextPrayer || isActualPrayer ? 'text-white' : 'text-white'}`}>{time}</div>
+                      <div className={`text-6xl font-extrabold text-shadow-lg ${isNextPrayer || isActualPrayer ? 'text-white' : 'text-white'}`}>{time}</div>
                       {isNextPrayer && (
                         <div className="text-sm font-medium mt-2 text-yellow-100 animate-pulse text-shadow-lg">● I ARDHSHËM ●</div>
                       )}

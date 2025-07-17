@@ -326,13 +326,13 @@ function App() {
         {/* Center Content - Clock and Rotating Content */}
         <div className="flex-1 flex flex-col justify-center items-center px-2">
           <div className="text-center mb-4">
-            <div className="text-7xl font-bold mb-1 text-shadow-xl tracking-wider">
+            <div className="text-8xl font-bold mb-1 text-shadow-xl tracking-wider">
               {currentTime.toLocaleTimeString('en-GB')}
             </div>
           </div>
           <div className="max-w-4xl w-full">
             {showCountdown ? (
-              <div className="text-center bg-gradient-to-r from-blue-600/80 to-green-600/80 w-full p-4 rounded-2xl backdrop-blur-enhanced border border-yellow-500/30 shadow-2xl prayer-glow tv-transition">
+              <div className="text-center w-full p-4 rounded-2xl backdrop-transparent border border-yellow-500/30 shadow-2xl prayer-glow tv-transition">
                 <div className="text-xl font-medium mb-2 text-yellow-100 text-shadow-lg">⏳ Vakti i ardhshëm</div>
                 <p className="text-3xl font-bold mb-1 text-white text-shadow-xl">
                   {nextPrayer.prayer}
@@ -342,13 +342,13 @@ function App() {
                 </p>
               </div>
             ) : (
-              <div className="bg-black/40 p-4 rounded-2xl backdrop-blur-enhanced border border-white/20 shadow-2xl tv-transition">
+              <div className="bg-black/40 p-4 rounded-2xl backdrop-blur-sm border border-white/20 shadow-2xl tv-transition">
                 <div className="text-center">
                   <p className="text-xl leading-relaxed mb-3 text-white text-shadow-lg">
                     {currentQuote.text}
                   </p>
                   <p className="text-lg opacity-80 text-blue-200 text-shadow-lg">
-                    ({currentQuote.source})
+                    (Kuran, {currentQuote.source})
                   </p>
                 </div>
               </div>
@@ -381,7 +381,7 @@ function App() {
                   const isActualPrayer = actualPrayerKey === prayer;
                   let cardClass = 'text-center p-6 rounded-xl tv-transition ';
                   if (isNextPrayer) {
-                    cardClass += 'bg-gradient-to-b from-blue-500/90 to-green-600/90 scale-110 shadow-2xl border-2 border-yellow-300 gentle-pulse prayer-glow ';
+                    cardClass += 'bg-transparent shadow-2xl border-2 border-yellow-300 gentle-pulse prayer-glow ';
                   } else if (isActualPrayer) {
                     cardClass += 'bg-black/60 border-2 border-green-400 shadow-xl ';
                   } else {
@@ -399,7 +399,7 @@ function App() {
                         <div className={`text-lg font-bold mb-2 text-shadow-lg ${isNextPrayer || isActualPrayer ? 'text-white' : 'text-green-300'}`}>
                           {prayerNames[prayer]}
                         </div>
-                        <div className={`text-2xl font-bold text-shadow-lg ${isNextPrayer || isActualPrayer ? 'text-white' : 'text-white'}`}>
+                        <div className={`text-5xl font-bold text-shadow-lg ${isNextPrayer || isActualPrayer ? 'text-white' : 'text-white'}`}>
                           {time}
                           <div className="text-base font-semibold text-blue-200 mt-2">
                             Sabahu: {prayerTimes.sabahu}
@@ -425,7 +425,7 @@ function App() {
                         <div className={`p-2 rounded-full ${isNextPrayer || isActualPrayer ? 'bg-white/20' : 'bg-white/10'}`}>{getPrayerIcon(prayer)}</div>
                       </div>
                       <div className={`text-lg font-bold mb-2 text-shadow-lg ${isNextPrayer || isActualPrayer ? 'text-white' : 'text-green-300'}`}>{prayerNames[prayer]}</div>
-                      <div className={`text-2xl font-bold text-shadow-lg ${isNextPrayer || isActualPrayer ? 'text-white' : 'text-white'}`}>{time}</div>
+                      <div className={`text-5xl font-bold text-shadow-lg ${isNextPrayer || isActualPrayer ? 'text-white' : 'text-white'}`}>{time}</div>
                       {isNextPrayer && (
                         <div className="text-sm font-medium mt-2 text-yellow-100 animate-pulse text-shadow-lg">● I ARDHSHËM ●</div>
                       )}
