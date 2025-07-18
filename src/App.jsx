@@ -109,7 +109,7 @@ function App() {
     return () => clearInterval(wallpaperTimer)
   }, [])
 
-  // Rotate quotes and countdown every 15 seconds
+  // Rotate quotes and countdown every 55 seconds
   useEffect(() => {
     const contentTimer = setInterval(() => {
       setShowCountdown(prev => {
@@ -120,7 +120,7 @@ function App() {
           return false
         }
       })
-    }, 15000)
+    }, 55000)
 
     return () => clearInterval(contentTimer)
   }, [quotesData])
