@@ -1,4 +1,11 @@
-export function formatIslamicDate(date) {
+import { getParisTime } from './timezone.js'
+
+export const formatIslamicDate = (date) => {
+  // Convert to Paris time before processing
+  const parisTime = getParisTime()
+  // Use parisTime.toJSDate() for your existing logic
+  const parisDate = parisTime.toJSDate()
+  
   const formatter = new Intl.DateTimeFormat("en-GB", {
     day: "numeric",
     month: "numeric",
@@ -6,7 +13,7 @@ export function formatIslamicDate(date) {
     calendar: "islamic-umalqura",
   });
 
-  const formattedParts = formatter.formatToParts(date);
+  const formattedParts = formatter.formatToParts(parisDate);
 
   // Customize the month names
   const monthNames = [

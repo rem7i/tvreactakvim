@@ -6,6 +6,7 @@ import { Switch } from '@/components/ui/switch.jsx'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.jsx'
 import { Settings, Sun, Moon, Sunset, Sunrise } from 'lucide-react'
 import mosqueBg from './assets/mosque-bg.jpg'
+import { getParisTime, getParisDate } from './utils/timezone.js'
 
 // Dynamically import all wallpapers in wallpapers folder
 const wallpapers = import.meta.glob('./assets/wallpapers/*.jpg', { eager: true, import: 'default' });
@@ -25,7 +26,7 @@ import './App.css'
 function App() {
   // Always skip the form on first launch
   const [showForm, setShowForm] = useState(false)
-  const [currentTime, setCurrentTime] = useState(new Date())
+  const [currentTime, setCurrentTime] = useState(() => getParisDate())
   const [showCountdown, setShowCountdown] = useState(false)
   const [prayerTimesData, setPrayerTimesData] = useState({})
   const [currentWallpaper, setCurrentWallpaper] = useState(() => getRandomWallpaper())
@@ -91,10 +92,10 @@ function App() {
     loadQuotes()
   }, [])
 
-  // Update current time every second
+  // Update current time every second using Paris timezone
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentTime(new Date())
+      setCurrentTime(getParisDate())
     }, 1000)
 
     return () => clearInterval(timer)

@@ -1,5 +1,7 @@
 // Prayer times utility functions
 
+import { getParisTime } from './timezone.js'
+
 export const parsePrayerTimesCSV = (csvText) => {
   const lines = csvText.trim().split('\n')
   const headers = lines[0].split(',')
@@ -29,7 +31,8 @@ export const parsePrayerTimesCSV = (csvText) => {
 }
 
 export const getTodaysPrayerTimes = (prayerData) => {
-  const today = new Date().toISOString().split('T')[0]
+  // Use Paris date instead of local date
+  const today = getParisTime().toISODate() // This gives YYYY-MM-DD format
   const todayData = prayerData[today]
 
   if (todayData) {
