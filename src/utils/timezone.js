@@ -7,10 +7,10 @@ export const getParisTime = () => {
   return DateTime.now().setZone(PARIS_TIMEZONE)
 }
 
-export const formatParisTime = (format = 'HH:mm:ss') => {
-  return getParisTime().toFormat(format)
-}
-
 export const getParisDate = () => {
   return getParisTime().toJSDate()
+}
+
+export const getParisDateString = () => {
+  return getParisTime().toISODate() // Returns YYYY-MM-DD format
 }

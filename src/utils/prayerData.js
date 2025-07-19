@@ -2,34 +2,6 @@
 
 import { getParisTime } from './timezone.js'
 
-export const parsePrayerTimesCSV = (csvText) => {
-  const lines = csvText.trim().split('\n')
-  const headers = lines[0].split(',')
-  const data = {}
-
-  for (let i = 1; i < lines.length; i++) {
-    const values = lines[i].split(',')
-    const date = values[0]
-
-    // Skip empty lines
-    if (!date || date.trim() === '') continue
-
-    data[date] = {
-      imsaku: values[1],      // Imsaku
-      sabahu: values[2],      // Sabahu (not used in display)
-      sunrise: values[3],     // Lindja (sunrise)
-      dreka: values[4],       // Dreka
-      ikindia: values[5],     // Ikindia
-      akshami: values[6],     // Akshami
-      jacia: values[7],       // Jacia
-      festat: values[8],      // Festat (holidays)
-      shenime: values[9]      // Shenime (notes)
-    }
-  }
-
-  return data
-}
-
 export const getTodaysPrayerTimes = (prayerData) => {
   // Use Paris date instead of local date
   const today = getParisTime().toISODate() // This gives YYYY-MM-DD format
@@ -38,7 +10,7 @@ export const getTodaysPrayerTimes = (prayerData) => {
   if (todayData) {
     return {
       imsaku: todayData.imsaku,
-      sabahu: todayData.sabahu, // Add sabahu
+      sabahu: todayData.sabahu,
       sunrise: todayData.sunrise,
       dreka: todayData.dreka,
       ikindia: todayData.ikindia,
@@ -50,7 +22,7 @@ export const getTodaysPrayerTimes = (prayerData) => {
   // Fallback times if date not found
   return {
     imsaku: '02:47',
-    sabahu: '03:15', // Fallback for sabahu
+    sabahu: '03:15',
     sunrise: '04:59',
     dreka: '12:44',
     ikindia: '16:47',

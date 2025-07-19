@@ -52,8 +52,8 @@ function App() {
 
   // Debug: Log today's prayer times
   useEffect(() => {
-    const today = new Date().toISOString().split('T')[0]
-    console.log('Today:', today)
+    const today = getParisTime().toISODate() // Use Paris date
+    console.log('Today (Paris):', today)
     console.log('Prayer times for today:', prayerTimes)
   }, [prayerTimes])
 
