@@ -50,12 +50,14 @@ function App() {
   // Get today's prayer times from CSV data
   const prayerTimes = getTodaysPrayerTimes(prayerTimesData)
 
-  // Debug: Log today's prayer times
+  // Debug: Log prayer times only when the data changes
   useEffect(() => {
-    const today = getParisTime().toISODate() // Use Paris date
-    console.log('Today (Paris):', today)
-    console.log('Prayer times for today:', prayerTimes)
-  }, [prayerTimes])
+    if (Object.keys(prayerTimesData).length > 0) {
+      const today = getParisTime().toISODate()
+      console.log('Today (Paris):', today)
+      console.log('Prayer times for today:', prayerTimes)
+    }
+  }, [prayerTimesData]) // Only re-run when prayer times data changes
 
   const [currentQuote, setCurrentQuote] = useState(albanianQuotes[0])
   const [quotesData, setQuotesData] = useState(albanianQuotes)

@@ -43,6 +43,28 @@ export const loadPrayerTimesFromCSV = async () => {
   }
 }
 
+// Function to parse prayer times CSV
+export const parsePrayerTimesCSV = (csvText) => {
+  const lines = csvText.trim().split('\n')
+  const prayerTimes = {}
+
+  // Skip header row
+  for (let i = 1; i < lines.length; i++) {
+    const [date, imsaku, sabahu, sunrise, dreka, ikindia, akshami, jacia] = lines[i].split(',')
+    prayerTimes[date] = {
+      imsaku,
+      sabahu,
+      sunrise,
+      dreka,
+      ikindia,
+      akshami,
+      jacia
+    }
+  }
+
+  return prayerTimes
+}
+
 // Function to parse quotes CSV
 export const parseQuotesCSV = (csvText) => {
   const lines = csvText.trim().split('\n')
