@@ -40,5 +40,5 @@ export const formatIslamicDate = (date) => {
   const formattedDate = formattedDateParts.map((part) => part.value).join("");
 
   // Check if AH is already included, if not add it
-  return formattedDate.includes("AH") ? formattedDate : formattedDate + " AH";
+  return formattedDate.includes("AH") ? formattedDate : formattedDate + " H";
 }

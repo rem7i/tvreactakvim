@@ -449,7 +449,7 @@ function App() {
         onClick={() => {
           setShowForm(true)
         }}
-        className="fixed bottom-6 right-6 z-50 p-3 bg-green-600 rounded-lg hover:bg-green-700 hover:scale-110 transition-all duration-300 shadow-lg hover:shadow-xl cursor-pointer border-2 border-green-500 hover:border-green-400"
+        className="fixed bottom-6 right-6 z-50 p-3 bg-green-600 rounded-lg hover:bg-blue-700 hover:scale-110 transition-all duration-300 shadow-lg hover:shadow-xl cursor-pointer border-2 border-green-500 hover:border-blue-400"
         style={{ pointerEvents: 'auto' }}
         title="Cilësimet - Kliko për të ndryshuar të dhënat"
       >
