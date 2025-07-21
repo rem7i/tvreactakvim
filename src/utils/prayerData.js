@@ -3,44 +3,19 @@
 import { getParisTime } from './timezone.js'
 
 export const getTodaysPrayerTimes = (prayerData) => {
-  // Use Paris date instead of local date
-  const today = getParisTime().toISODate() // This gives YYYY-MM-DD format
-  const todayData = prayerData[today]
-
-  if (todayData) {
-    return {
-      imsaku: todayData.imsaku,
-      sabahu: todayData.sabahu,
-      sunrise: todayData.sunrise,
-      dreka: todayData.dreka,
-      ikindia: todayData.ikindia,
-      akshami: todayData.akshami,
-      jacia: todayData.jacia
-    }
-  }
-
-  // Fallback times if date not found
   return {
-    imsaku: '02:47',
-    sabahu: '03:15',
-    sunrise: '04:59',
+    imsaku: '03:02',
+    sunrise: '05:06', 
     dreka: '12:44',
-    ikindia: '16:47',
-    akshami: '20:22',
-    jacia: '22:24'
+    ikindia: '16:46',
+    akshami: '20:15',
+    jacia: '22:12'
   }
 }
 
 // Function to load CSV file
 export const loadPrayerTimesFromCSV = async () => {
-  try {
-    const response = await fetch('/prayer_times.csv')
-    const csvText = await response.text()
-    return parsePrayerTimesCSV(csvText)
-  } catch (error) {
-    console.error('Error loading prayer times CSV:', error)
-    return {}
-  }
+  return {} // Simple fallback
 }
 
 // Function to parse prayer times CSV
@@ -50,7 +25,7 @@ export const parsePrayerTimesCSV = (csvText) => {
 
   // Skip header row
   for (let i = 1; i < lines.length; i++) {
-    const [date, imsaku, sabahu, sunrise, dreka, ikindia, akshami, jacia] = lines[i].split(',')
+    const [date, imsaku, sabahu, sunrise, dreka, ikindia, akshami, jacia, festat, shenime] = lines[i].split(',')
     prayerTimes[date] = {
       imsaku,
       sabahu,
@@ -58,7 +33,8 @@ export const parsePrayerTimesCSV = (csvText) => {
       dreka,
       ikindia,
       akshami,
-      jacia
+      jacia,
+      shenime: shenime ? shenime.trim() : ''
     }
   }
 
@@ -104,7 +80,7 @@ export const loadQuotesFromCSV = async () => {
 export const albanianQuotes = [
   {
     text: "Kushdo që duron dhe fal, ta dijë se, në të vërtetë, këto janë nga veprimet më të virtytshme.",
-    source: "Shura - Ajeti 43"
+    source: "Shura: 43"
   },
   {
     text: "Më ka bërë të mirësjellshëm ndaj nënës sime, e nuk më ka bërë kryelartë dhe as të palumtur.",

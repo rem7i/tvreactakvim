@@ -1,247 +1,182 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button.jsx'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.jsx'
 import { Input } from '@/components/ui/input.jsx'
 import { Label } from '@/components/ui/label.jsx'
-import { Switch } from '@/components/ui/switch.jsx'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.jsx'
-import { Settings, Sun, Moon, Sunset, Sunrise } from 'lucide-react'
+import { Settings, Sun, Moon, Sunrise, Sunset } from 'lucide-react'
 import mosqueBg from './assets/mosque-bg.jpg'
-import { getParisTime, getParisDate } from './utils/timezone.js'
+import { getParisTime, getParisDateString } from './utils/timezone.js'
+import { getTodaysPrayerTimes, loadPrayerTimesFromCSV, formatAlbanianDate, loadQuotesFromCSV, albanianQuotes } from './utils/prayerData.js'
+import { formatIslamicDate } from './utils/hijri-converter.js'
+import './App.css'
 
-// Dynamically import all wallpapers in wallpapers folder
+
 const wallpapers = import.meta.glob('./assets/wallpapers/*.jpg', { eager: true, import: 'default' });
 
 function getRandomWallpaper() {
   const wallpaperKeys = Object.keys(wallpapers);
-  if (wallpaperKeys.length === 0) return mosqueBg;
+  
+  if (wallpaperKeys.length === 0) {
+    console.warn('No wallpapers found, using default mosque background');
+    return mosqueBg;
+  }
   
   const randomKey = wallpaperKeys[Math.floor(Math.random() * wallpaperKeys.length)];
-  return wallpapers[randomKey] || mosqueBg;
+  const selectedWallpaper = wallpapers[randomKey]?.default || wallpapers[randomKey];
+  
+  if (!selectedWallpaper) {
+    console.warn('Selected wallpaper not found, using default mosque background');
+    return mosqueBg;
+  }
+  
+  return selectedWallpaper;
 }
 
-import { albanianQuotes, formatAlbanianDate, prayerNames, loadPrayerTimesFromCSV, getTodaysPrayerTimes, loadQuotesFromCSV } from './utils/prayerData.js'
-import { formatIslamicDate } from './utils/hijri-converter.js'
-import './App.css'
+// Prayer icons mapping
+const prayerIcons = {
+  imsaku: Moon,
+  sunrise: Sunrise,
+  dreka: Sun,
+  ikindia: Sun,
+  akshami: Sunset,
+  jacia: Moon
+}
+
+// Prayer names in Albanian
+const prayerNames = {
+  imsaku: 'Imsaku',
+  sunrise: 'L. e Diellit',
+  dreka: 'Dreka',
+  ikindia: 'Ikindia',
+  akshami: 'Akshami',
+  jacia: 'Jacia'
+}
 
 function App() {
-  // Always skip the form on first launch
+  const [currentTime, setCurrentTime] = useState(new Date())
+  const [prayerData, setPrayerData] = useState({})
+  const [backgroundImage, setBackgroundImage] = useState(() => getRandomWallpaper())
+  const [showSettings, setShowSettings] = useState(false)
+  const [showCountdown, setShowCountdown] = useState(true)
+  const [currentQuote, setCurrentQuote] = useState(albanianQuotes[0])
+  const [quotesData, setQuotesData] = useState(albanianQuotes)
   const [showForm, setShowForm] = useState(false)
-  const [currentTime, setCurrentTime] = useState(() => getParisDate())
-  const [showCountdown, setShowCountdown] = useState(false)
-  const [prayerTimesData, setPrayerTimesData] = useState({})
-  const [currentWallpaper, setCurrentWallpaper] = useState(() => getRandomWallpaper())
   const [formData, setFormData] = useState(() => {
-    // Try to load saved data from localStorage
-    const saved = localStorage.getItem('mosqueFormData')
-    if (saved) {
-      try {
-        return JSON.parse(saved)
-      } catch (e) {
-        console.error('Error parsing saved form data:', e)
+    try {
+      const saved = localStorage.getItem('mosqueFormData')
+      return saved ? JSON.parse(saved) : { 
+        imam: '', 
+        mosqueName: '', 
+        location: '', 
+        announcementTitle: '',
+        announcementContent: ''
       }
-    }
-    return {
-      imam: '',
-      mosqueName: '',
-      location: ''
+    } catch (e) {
+      console.error('Error parsing saved form data:', e)
+      return { 
+        imam: '', 
+        mosqueName: '', 
+        location: '', 
+        announcementTitle: '',
+        announcementContent: ''
+      }
     }
   })
 
-  // Get today's prayer times from CSV data
-  const prayerTimes = getTodaysPrayerTimes(prayerTimesData)
-
-  // Debug: Log prayer times only when the data changes
-  useEffect(() => {
-    if (Object.keys(prayerTimesData).length > 0) {
-      const today = getParisTime().toISODate()
-      console.log('Today (Paris):', today)
-      console.log('Prayer times for today:', prayerTimes)
-    }
-  }, [prayerTimesData]) // Only re-run when prayer times data changes
-
-  const [currentQuote, setCurrentQuote] = useState(albanianQuotes[0])
-  const [quotesData, setQuotesData] = useState(albanianQuotes)
-
-  // Load prayer times from CSV on component mount
-  useEffect(() => {
-    const loadPrayerTimes = async () => {
-      try {
-        const data = await loadPrayerTimesFromCSV()
-        setPrayerTimesData(data)
-        console.log('Prayer times loaded from CSV:', Object.keys(data).length, 'days')
-      } catch (error) {
-        console.error('Failed to load prayer times:', error)
-      }
-    }
-
-    loadPrayerTimes()
-  }, [])
-
-  // Load quotes from CSV on component mount
-  useEffect(() => {
-    const loadQuotes = async () => {
-      try {
-        const quotes = await loadQuotesFromCSV()
-        setQuotesData(quotes)
-        setCurrentQuote(quotes[0] || albanianQuotes[0])
-        console.log('Quotes loaded from CSV:', quotes.length, 'quotes')
-      } catch (error) {
-        console.error('Failed to load quotes:', error)
-        setQuotesData(albanianQuotes)
-      }
-    }
-
-    loadQuotes()
-  }, [])
-
-  // Update current time every second using Paris timezone
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(getParisDate())
-    }, 1000)
-
-    return () => clearInterval(timer)
-  }, [])
-
-  // Change wallpaper every 12 hours
-  useEffect(() => {
-    const wallpaperTimer = setInterval(() => {
-      setCurrentWallpaper(getRandomWallpaper())
-    }, 43200000) // 12 hours
-
-    return () => clearInterval(wallpaperTimer)
-  }, [])
-
-  // Rotate quotes and countdown every 55 seconds
-  useEffect(() => {
-    const contentTimer = setInterval(() => {
-      setShowCountdown(prev => {
-        if (!prev) {
-          return true
-        } else {
-          setCurrentQuote(quotesData[Math.floor(Math.random() * quotesData.length)])
-          return false
-        }
-      })
-    }, 55000)
-
-    return () => clearInterval(contentTimer)
-  }, [quotesData])
-
   const handleFormSubmit = (e) => {
     e.preventDefault()
-    // Save form data to localStorage
     localStorage.setItem('mosqueFormData', JSON.stringify(formData))
     setShowForm(false)
   }
 
   const handleInputChange = (field, value) => {
     setFormData(prev => {
-      const newData = {
-        ...prev,
-        [field]: value
-      }
-      // Auto-save to localStorage as user types
+      const newData = { ...prev, [field]: value }
       localStorage.setItem('mosqueFormData', JSON.stringify(newData))
       return newData
     })
   }
 
+  // Effect for wallpaper rotation every 12 hours
+  useEffect(() => {
+    const wallpaperTimer = setInterval(() => {
+      setBackgroundImage(getRandomWallpaper())
+    }, 12 * 60 * 60 * 1000) // 12 hours in milliseconds
+
+    return () => clearInterval(wallpaperTimer)
+  }, [])
+
+  // Default prayer times
+  const defaultPrayerTimes = {
+    imsaku: '03:02',
+    sunrise: '05:06',
+    dreka: '12:44',
+    ikindia: '16:46',
+    akshami: '20:15',
+    jacia: '22:12'
+  }
+
+  const todaysPrayerTimes = getTodaysPrayerTimes(prayerData) || defaultPrayerTimes
+
+  // Get current prayer and next prayer
   const getCurrentPrayer = () => {
-    const now = currentTime.getHours() * 60 + currentTime.getMinutes()
-    const times = [
-      { name: 'imsaku', time: prayerTimes.imsaku },
-      { name: 'sunrise', time: prayerTimes.sunrise },
-      { name: 'dreka', time: prayerTimes.dreka },
-      { name: 'ikindia', time: prayerTimes.ikindia },
-      { name: 'akshami', time: prayerTimes.akshami },
-      { name: 'jacia', time: prayerTimes.jacia }
-    ]
-
-    for (let i = 0; i < times.length; i++) {
-      const [hours, minutes] = times[i].time.split(':').map(Number)
-      const prayerMinutes = hours * 60 + minutes
-      
-      if (now < prayerMinutes) {
-        return times[i].name
-      }
-    }
+    const now = currentTime.toTimeString().slice(0, 5)
+    const prayers = Object.entries(todaysPrayerTimes)
     
-    return 'imsaku' // Next day's first prayer
-  }
-
-  const getNextPrayerCountdown = () => {
-    const now = currentTime.getHours() * 60 + currentTime.getMinutes()
-    const times = [
-      { name: 'imsaku', time: prayerTimes.imsaku, label: prayerNames.imsaku },
-      { name: 'sunrise', time: prayerTimes.sunrise, label: prayerNames.sunrise },
-      { name: 'dreka', time: prayerTimes.dreka, label: prayerNames.dreka },
-      { name: 'ikindia', time: prayerTimes.ikindia, label: prayerNames.ikindia },
-      { name: 'akshami', time: prayerTimes.akshami, label: prayerNames.akshami },
-      { name: 'jacia', time: prayerTimes.jacia, label: prayerNames.jacia }
-    ]
-
-    for (let i = 0; i < times.length; i++) {
-      const [hours, minutes] = times[i].time.split(':').map(Number)
-      const prayerMinutes = hours * 60 + minutes
-      
-      if (now < prayerMinutes) {
-        const remainingMinutes = prayerMinutes - now
-        const hours = Math.floor(remainingMinutes / 60)
-        const mins = remainingMinutes % 60
-        
-        return {
-          prayer: times[i].label,
-          time: hours > 0 ? `${hours} orë e ${mins} minuta` : `${mins} minuta`
-        }
-      }
-    }
-    
-    // Next day's first prayer
-    const [hours, minutes] = times[0].time.split(':').map(Number)
-    const prayerMinutes = hours * 60 + minutes
-    const remainingMinutes = (24 * 60) - now + prayerMinutes
-    const hrs = Math.floor(remainingMinutes / 60)
-    const mins = remainingMinutes % 60
-    
-    return {
-      prayer: times[0].label,
-      time: hrs > 0 ? `${hrs} orë e ${mins} minuta` : `${mins} minuta`
-    }
-  }
-
-  const getPrayerIcon = (prayer) => {
-    switch (prayer) {
-      case 'imsaku':
-      case 'jacia':
-        return <Moon className="w-6 h-6" />
-      case 'akshami':
-        return <Sunset className="w-6 h-6" />
-      case 'sunrise':
-        return <Sunrise className="w-6 h-6" />
-      default:
-        return <Sun className="w-6 h-6" />
-    }
-  }
-
-  // Returns the key of the actual (ongoing) prayer
-  const getActualPrayer = () => {
-    const prayers = ['imsaku', 'sunrise', 'dreka', 'ikindia', 'akshami', 'jacia'];
-    const now = currentTime.getHours() * 60 + currentTime.getMinutes();
-    let lastPrayer = prayers[0];
     for (let i = 0; i < prayers.length; i++) {
-      const t = prayerTimes[prayers[i]];
-      if (!t) continue;
-      const [h, m] = t.split(':').map(Number);
-      const mins = h * 60 + m;
-      if (now >= mins) {
-        lastPrayer = prayers[i];
-      } else {
-        break;
+      const [name, time] = prayers[i]
+      if (now < time) {
+        return { current: i > 0 ? prayers[i-1][0] : null, next: name }
       }
     }
-    return lastPrayer;
-  };
+    return { current: prayers[prayers.length-1][0], next: prayers[0][0] }
+  }
+
+  const { current, next } = getCurrentPrayer()
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date())
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [])
+
+  useEffect(() => {
+    loadPrayerTimesFromCSV().then(data => {
+      setPrayerData(data)
+    }).catch(error => {
+      console.error('Failed to load prayer times:', error)
+    })
+  }, [])
+
+  // Load quotes from CSV
+  useEffect(() => {
+    const loadQuotes = async () => {
+      try {
+        const quotes = await loadQuotesFromCSV()
+        setQuotesData(quotes)
+        setCurrentQuote(quotes[0] || albanianQuotes[0])
+      } catch (error) {
+        console.error('Failed to load quotes:', error)
+        setQuotesData(albanianQuotes)
+      }
+    }
+    loadQuotes()
+  }, [])
+
+  // Rotate between countdown and quotes every 55 seconds
+  useEffect(() => {
+    const contentTimer = setInterval(() => {
+      setShowCountdown(prev => {
+        if (!prev) {
+          setCurrentQuote(quotesData[Math.floor(Math.random() * quotesData.length)])
+        }
+        return !prev
+      })
+    }, 55000) // 55 seconds
+
+    return () => clearInterval(contentTimer)
+  }, [quotesData])
 
   if (showForm) {
     return (
@@ -294,12 +229,58 @@ function App() {
                   placeholder="Fshati, Qyteti..."
                 />
               </div>
+
+              <div className="space-y-2 mt-6 pt-4 border-t border-gray-200">
+                <Label htmlFor="announcementTitle" className="text-purple-600 font-semibold flex items-center gap-2">
+                  📢 Titulli i njoftimit:
+                </Label>
+                <Input
+                  id="announcementTitle"
+                  value={formData.announcementTitle}
+                  onChange={(e) => handleInputChange('announcementTitle', e.target.value)}
+                  className="border-purple-500 focus:border-purple-600 transition-colors"
+                  placeholder="p.sh. Njoftim i rëndësishëm..."
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="announcementContent" className="text-purple-600 font-semibold flex items-center gap-2">
+                  📝 Përmbajtja e njoftimit:
+                </Label>
+                <textarea
+                  id="announcementContent"
+                  value={formData.announcementContent}
+                  onChange={(e) => handleInputChange('announcementContent', e.target.value)}
+                  className="w-full px-3 py-2 border rounded-md border-purple-500 focus:border-purple-600 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-200"
+                  placeholder="Shkruani njoftimin tuaj këtu..."
+                  rows="4"
+                />
+              </div>
+
               <div className="text-sm text-gray-500">
                 Copyright © <a href="https://takvimi.app" className="text-blue-500 hover:text-blue-600">Takvimi.app</a> - All rights reserved
               </div>
-              <Button type="submit" className="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-3 transition-colors">
-                ✅ Ruaje
-              </Button>
+              <div className="flex gap-4">
+                <Button type="submit" className="flex-1 bg-teal-600 hover:bg-teal-700 text-white font-semibold py-3 transition-colors">
+                  ✅ Ruaji të dhënat
+                </Button>
+                <Button 
+                  type="button" 
+                  onClick={() => {
+                    setFormData({ 
+                      imam: '', 
+                      mosqueName: '', 
+                      location: '', 
+                      announcementTitle: '',
+                      announcementContent: ''
+                    });
+                    localStorage.removeItem('mosqueFormData');
+                  }}
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-3 transition-colors"
+                >
+                  🗑️ Pastro të dhënat
+                </Button>
+              </div>
             </form>
           </CardContent>
         </Card>
@@ -307,29 +288,33 @@ function App() {
     )
   }
 
-  const nextPrayer = getNextPrayerCountdown()
   return (
-    <div className="min-h-screen bg-cover bg-center bg-no-repeat text-white relative overflow-hidden"
-         style={{backgroundImage: `url(${currentWallpaper})`}}>
-      <div className="absolute inset-0 bg-black/50"></div>
-      <div className="relative z-10 flex flex-col h-screen">
-        {/* Header - Dates */}
-        <div className="flex justify-between items-start px-6 pt-4 pb-2">
-          <div className="bg-black/10 p-4 rounded-xl backdrop-blur-sm">
-            <div className="text-2xl font-semibold">
-              {formatAlbanianDate(currentTime)}
-            </div>
+    <div 
+      className="min-h-screen bg-cover bg-center bg-no-repeat relative transition-all duration-1000"
+      style={{ 
+        backgroundImage: `url(${backgroundImage || mosqueBg})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center'
+      }}
+    >
+      <div className="absolute inset-0 bg-black/40" />
+      
+      <div className="relative z-10 p-8 text-white min-h-screen flex flex-col">
+        {/* Top Bar with Dates */}
+        <div className="flex justify-between items-start mb-8">
+          <div className="text-lg font-medium text-shadow-lg">
+            {formatAlbanianDate(currentTime)}
           </div>
-          <div className="bg-black/10 p-4 rounded-xl backdrop-blur-sm">
-            <div className="text-2xl font-semibold">
-              {formatIslamicDate(currentTime)}
-            </div>
+          <div className="text-lg font-medium text-shadow-lg">
+            {formatIslamicDate(currentTime)}
           </div>
         </div>
-        {/* Center Content - Clock and Rotating Content */}
+
+        {/* Center Content */}
         <div className="flex-1 flex flex-col justify-center items-center px-2">
+          {/* Large Clock */}
           <div className="text-center mb-4">
-            <div className="text-8xl font-bold mb-1 text-shadow-xl tracking-wider">
+            <div className="text-8xl font-mono font-bold text-shadow-xl tracking-wider">
               {currentTime.toLocaleTimeString('en-GB')}
             </div>
           </div>
@@ -338,27 +323,64 @@ function App() {
               <div className="text-center w-full p-4 rounded-2xl backdrop-transparent border border-yellow-500/30 shadow-2xl prayer-glow tv-transition">
                 <div className="text-xl font-medium mb-2 text-yellow-100 text-shadow-lg">⏳ Vakti i ardhshëm</div>
                 <p className="text-3xl font-bold mb-1 text-white text-shadow-xl">
-                  {nextPrayer.prayer}
+                  {prayerNames[next]}
                 </p>
                 <p className="text-2xl font-semibold text-yellow-100 text-shadow-lg">
-                  edhe {nextPrayer.time}
+                  edhe {(() => {
+                    // Calculate time until next prayer
+                    const now = currentTime;
+                    const nextTimeStr = todaysPrayerTimes[next];
+                    if (!nextTimeStr) return '-';
+
+                    // Parse next prayer time
+                    const [h, m] = nextTimeStr.split(':').map(Number);
+                    const nextPrayerDate = new Date(now);
+                    nextPrayerDate.setHours(h, m, 0, 0);
+
+                    // If next prayer is earlier than now, it's for the next day
+                    if (nextPrayerDate <= now) {
+                      nextPrayerDate.setDate(nextPrayerDate.getDate() + 1);
+                    }
+
+                    const diffMs = nextPrayerDate - now;
+                    if (diffMs < 0) return '-';
+
+                    const diffH = Math.floor(diffMs / (1000 * 60 * 60));
+                    const diffM = Math.floor((diffMs / (1000 * 60)) % 60);
+                    const diffS = Math.floor((diffMs / 1000) % 60);
+
+                    return `${diffH > 0 ? diffH + ' orë ' : ''}${diffM} minuta ${diffS} sekonda`;
+                  })()}
                 </p>
-              </div>
+              </div>  
             ) : (
-              <div className="bg-black/40 p-4 rounded-2xl backdrop-blur-sm border border-white/20 shadow-2xl tv-transition">
-                <div className="text-center">
-                  <p className="text-xl leading-relaxed mb-3 text-white text-shadow-lg">
-                    {currentQuote.text}
-                  </p>
-                  <p className="text-lg opacity-80 text-blue-200 text-shadow-lg">
-                    (Kuran, {currentQuote.source})
-                  </p>
-                </div>
+              <div className="text-center w-full p-4 rounded-2xl backdrop-transparent border border-yellow-500/30 shadow-2xl prayer-glow tv-transition">
+                {formData.announcementContent ? (
+                  <>
+                    <p className="text-3xl font-bold mb-1 text-white text-shadow-xl">
+                      {formData.announcementContent}
+                    </p>
+                    {formData.announcementTitle && (
+                      <p className="text-lg font-semibold text-yellow-100 text-shadow-lg">
+                        - {formData.announcementTitle}
+                      </p>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <p className="text-3xl font-bold mb-1 text-white text-shadow-xl">
+                      {currentQuote.text}
+                    </p>
+                    <p className="text-lg font-semibold text-yellow-100 text-shadow-lg">
+                      - {currentQuote.source}
+                    </p>
+                  </>
+                )}
               </div>
-            )}
+            )}            
           </div>
-        </div>
-        {/* Info Row - Mosque and Imam (just above Prayer Times grid) */}
+        </div>  
+        {/* Info Row - Mosque and Imam */}
         {(formData.mosqueName || formData.location || formData.imam) && (
           <div className="flex justify-between items-center w-full px-8 pb-2">
             <div className="text-green-300 font-semibold text-xl">
@@ -370,93 +392,53 @@ function App() {
             </div>
           </div>
         )}
-        {/* Bottom - Prayer Times */}
-        <div className="w-full flex justify-center pb-6">
-          <div className="bg-black/30 p-3 rounded-2xl backdrop-blur-enhanced border border-white/20 w-full">
-            <div className="flex flex-col items-center w-full">
+        {/* Bottom Prayer Times */}
+          <div className="grid grid-cols-6 gap-4">
+            {Object.entries(todaysPrayerTimes).map(([prayer, time]) => {
+              const Icon = prayerIcons[prayer] || Sun;
+              const isActive = prayer === current;
+              const isNext = prayer === next;
               
-              <div className="grid grid-cols-6 gap-6 w-full">
-                {['imsaku', 'sunrise', 'dreka', 'ikindia', 'akshami', 'jacia'].map((prayer) => {
-                  const time = prayerTimes[prayer];
-                  const nextPrayerKey = getCurrentPrayer();
-                  const actualPrayerKey = getActualPrayer();
-                  const isNextPrayer = nextPrayerKey === prayer;
-                  const isActualPrayer = actualPrayerKey === prayer;
-                  let cardClass = 'text-center p-6 rounded-xl tv-transition ';
-                  if (isNextPrayer) {
-                    cardClass += 'bg-transparent shadow-2xl border-2 border-yellow-300 gentle-pulse prayer-glow ';
-                  } else if (isActualPrayer) {
-                    cardClass += 'bg-black/60 border-2 border-green-400 shadow-xl ';
-                  } else {
-                    cardClass += 'bg-black/50 hover:bg-black/60 border border-white/20 ';
-                  }
-                  // Special rendering for Imsaku: show both Imsaku and Sabahu
-                  if (prayer === 'imsaku') {
-                    return (
-                      <div key={prayer} className={cardClass}>
-                        <div className={`flex justify-center mb-3`}>
-                          <div className={`p-2 rounded-full ${isNextPrayer || isActualPrayer ? 'bg-white/20' : 'bg-white/10'}`}>
-                            {getPrayerIcon(prayer)}
-                          </div>
-                        </div>
-                        <div className={`text-lg font-bold mb-2 text-shadow-lg ${isNextPrayer || isActualPrayer ? 'text-white' : 'text-green-300'}`}>
-                          {prayerNames[prayer]}
-                        </div>
-                        <div className={`text-5xl font-bold text-shadow-lg ${isNextPrayer || isActualPrayer ? 'text-white' : 'text-white'}`}>
-                          {time}
-                          <div className="text-base font-semibold text-blue-200 mt-2">
-                            Sabahu: {prayerTimes.sabahu}
-                          </div>
-                        </div>
-                        {isNextPrayer && (
-                          <div className="text-sm font-medium mt-2 text-yellow-100 animate-pulse text-shadow-lg">
-                            ● I ARDHSHËM ●
-                          </div>
-                        )}
-                        {isActualPrayer && (
-                          <div className="text-sm font-medium mt-2 text-green-200 animate-pulse text-shadow-lg">
-                            ● AKTUAL ●
-                          </div>
-                        )}
-                      </div>
-                    );
-                  }
-                  // Default rendering for other prayers
-                  return (
-                    <div key={prayer} className={cardClass}>
-                      <div className="flex justify-center mb-3">
-                        <div className={`p-2 rounded-full ${isNextPrayer || isActualPrayer ? 'bg-white/20' : 'bg-white/10'}`}>{getPrayerIcon(prayer)}</div>
-                      </div>
-                      <div className={`text-lg font-bold mb-2 text-shadow-lg ${isNextPrayer || isActualPrayer ? 'text-white' : 'text-green-300'}`}>{prayerNames[prayer]}</div>
-                      <div className={`text-5xl font-bold text-shadow-lg ${isNextPrayer || isActualPrayer ? 'text-white' : 'text-white'}`}>{time}</div>
-                      {isNextPrayer && (
-                        <div className="text-sm font-medium mt-2 text-yellow-100 animate-pulse text-shadow-lg">● I ARDHSHËM ●</div>
-                      )}
-                      {isActualPrayer && (
-                        <div className="text-sm font-medium mt-2 text-green-200 animate-pulse text-shadow-lg">● AKTUAL ●</div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-              
-            </div>
+              return (
+                <Card 
+                  key={prayer} 
+                  className={`bg-black/10 backdrop-blur-sm border-2 transition-all duration-300 ${
+                    isActive ? 'border-green-400 prayer-glow' : 
+                    isNext ? 'border-orange-400 gentle-pulse prayer-glow tv-transition' : 'border-white/10'
+                  }`}
+                >
+                  <CardContent className="p-4 text-center">
+                    <Icon className="w-6 h-6 mx-auto mb-2 opacity-30 text-white text-shadow-sm" />
+                    <div className="text-lg text-white/70 font-medium mb-1">{prayerNames[prayer]}</div>
+                    <div className="text-3xl text-white/90 text-shadow-md font-bold">{time}</div>
+                    {prayer === 'imsaku' && (
+                      <div className="text-xs text-white/70 mt-1 opacity-70">Sabahu: 3:22</div>
+                    )}
+                    {isActive && (
+                      <div className="text-xs mt-1 text-green-400">● AKTUAL ●</div>
+                    )}
+                    {isNext && (
+                      <div className="text-xs mt-1 text-orange-400">● I ARDHSHËM ●</div>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
-        </div>
+        
+
+        {/* Settings button stays fixed at bottom right */}
+        <button
+          onClick={() => setShowForm(true)}
+          className="fixed bottom-6 right-6 z-50 p-3 bg-green-600 rounded-lg hover:bg-blue-700 hover:scale-100 transition-all duration-300 shadow-lg hover:shadow-xl cursor-pointer border-2 border-green-500 hover:border-blue-400"
+          style={{ pointerEvents: 'auto' }}
+          title="Cilësimet- Kliko për të ndryshuar të dhënat"
+        >
+          <Settings className="w-6 h-6" />
+        </button>
       </div>
-      {/* Settings button stays fixed at bottom right */}
-      <button
-        onClick={() => {
-          setShowForm(true)
-        }}
-        className="fixed bottom-6 right-6 z-50 p-3 bg-green-600 rounded-lg hover:bg-blue-700 hover:scale-100 transition-all duration-300 shadow-lg hover:shadow-xl cursor-pointer border-2 border-green-500 hover:border-blue-400"
-        style={{ pointerEvents: 'auto' }}
-        title="Cilësimet- Kliko për të ndryshuar të dhënat"
-      >
-        <Settings className="w-6 h-6" />
-      </button>
     </div>
-  )
+  );
 }
 
 export default App
