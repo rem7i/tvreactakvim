@@ -45,6 +45,7 @@ const prayerIcons = {
 // Prayer names in Albanian
 const prayerNames = {
   imsaku: 'Imsaku',
+  sabahu: 'Sabahu',
   sunrise: 'L. e Diellit',
   dreka: 'Dreka',
   ikindia: 'Ikindia',
@@ -109,6 +110,7 @@ function App() {
   // Default prayer times
   const defaultPrayerTimes = {
     imsaku: '03:02',
+    sabahu: '03:22',
     sunrise: '05:06',
     dreka: '12:44',
     ikindia: '16:46',
@@ -186,47 +188,41 @@ function App() {
         <Card className="w-full max-w-md relative z-10 shadow-2xl">
           <CardHeader>
             <CardTitle className="text-center text-xl flex items-center justify-center gap-2">
-              📝 Plotësoni të dhënat e xhamisë
+              📝 Plotësoni të dhënat e xhamisë:
             </CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleFormSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="imam" className="text-green-600 font-semibold flex items-center gap-2">
-                  🧔🏻 Imami:
-                </Label>
+                
                 <Input
                   id="imam"
                   value={formData.imam}
                   onChange={(e) => handleInputChange('imam', e.target.value)}
                   className="border-green-500 focus:border-green-600 transition-colors"
-                  placeholder="Emri i imamit..."
+                  placeholder="🧔🏻 Emri i imamit..."
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="mosqueName" className="text-orange-600 font-semibold flex items-center gap-2">
-                  🕌 Emri i xhamisë:
-                </Label>
+               
                 <Input
                   id="mosqueName"
                   value={formData.mosqueName}
                   onChange={(e) => handleInputChange('mosqueName', e.target.value)}
                   className="border-orange-500 focus:border-orange-600 transition-colors"
-                  placeholder="Emri i xhamisë..."
+                  placeholder="🕌 Emri i xhamisë..."
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="location" className="text-teal-600 font-semibold flex items-center gap-2">
-                  📍 Lokacioni:
-                </Label>
+                
                 <Input
                   id="location"
                   value={formData.location}
                   onChange={(e) => handleInputChange('location', e.target.value)}
                   className="border-teal-500 focus:border-teal-600 transition-colors"
-                  placeholder="Fshati, Qyteti..."
+                  placeholder="📌Fshati, Qyteti..."
                 />
               </div>
 
@@ -258,11 +254,11 @@ function App() {
               </div>
 
               <div className="text-sm text-gray-500">
-                Copyright © <a href="https://takvimi.app" className="text-blue-500 hover:text-blue-600">Takvimi.app</a> - All rights reserved
+                Copyright &copy; <a href="https://takvimi.app" className="text-blue-500 hover:text-blue-600">Takvimi.app</a> - All rights reserved
               </div>
               <div className="flex gap-4">
                 <Button type="submit" className="flex-1 bg-teal-600 hover:bg-teal-700 text-white font-semibold py-3 transition-colors">
-                  ✅ Ruaji të dhënat
+                  &#10004; Ruani t&#235; dh&#235;nat
                 </Button>
                 <Button 
                   type="button" 
@@ -278,7 +274,7 @@ function App() {
                   }}
                   className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-3 transition-colors"
                 >
-                  🗑️ Pastro të dhënat
+                  &#128465; Fshini t&#235; dh&#235;nat
                 </Button>
               </div>
             </form>
@@ -321,7 +317,7 @@ function App() {
           <div className="max-w-4xl w-full">
             {showCountdown ? (
               <div className="text-center w-full p-4 rounded-2xl backdrop-transparent border border-yellow-500/30 shadow-2xl prayer-glow tv-transition">
-                <div className="text-xl font-medium mb-2 text-yellow-100 text-shadow-lg">⏳ Vakti i ardhshëm</div>
+                <div className="text-xl font-medium mb-2 text-yellow-100 text-shadow-lg">&#9201; Vakti i ardhsh&#235;m</div>
                 <p className="text-3xl font-bold mb-1 text-white text-shadow-xl">
                   {prayerNames[next]}
                 </p>
@@ -362,7 +358,7 @@ function App() {
                     </p>
                     {formData.announcementTitle && (
                       <p className="text-lg font-semibold text-yellow-100 text-shadow-lg">
-                        - {formData.announcementTitle}
+                        -Njoftim: {formData.announcementTitle} -
                       </p>
                     )}
                   </>
@@ -372,7 +368,7 @@ function App() {
                       {currentQuote.text}
                     </p>
                     <p className="text-lg font-semibold text-yellow-100 text-shadow-lg">
-                      - {currentQuote.source}
+                      (Kuran, {currentQuote.source})
                     </p>
                   </>
                 )}
@@ -394,45 +390,47 @@ function App() {
         )}
         {/* Bottom Prayer Times */}
           <div className="grid grid-cols-6 gap-4">
-            {Object.entries(todaysPrayerTimes).map(([prayer, time]) => {
-              const Icon = prayerIcons[prayer] || Sun;
-              const isActive = prayer === current;
-              const isNext = prayer === next;
-              
-              return (
-                <Card 
-                  key={prayer} 
-                  className={`bg-black/10 backdrop-blur-sm border-2 transition-all duration-300 ${
-                    isActive ? 'border-green-400 prayer-glow' : 
-                    isNext ? 'border-orange-400 gentle-pulse prayer-glow tv-transition' : 'border-white/10'
-                  }`}
-                >
-                  <CardContent className="p-4 text-center">
-                    <Icon className="w-6 h-6 mx-auto mb-2 opacity-30 text-white text-shadow-sm" />
-                    <div className="text-lg text-white/70 font-medium mb-1">{prayerNames[prayer]}</div>
-                    <div className="text-3xl text-white/90 text-shadow-md font-bold">{time}</div>
-                    {prayer === 'imsaku' && (
-                      <div className="text-xs text-white/70 mt-1 opacity-70">Sabahu: 3:22</div>
-                    )}
-                    {isActive && (
-                      <div className="text-xs mt-1 text-green-400">● AKTUAL ●</div>
-                    )}
-                    {isNext && (
-                      <div className="text-xs mt-1 text-orange-400">● I ARDHSHËM ●</div>
-                    )}
-                  </CardContent>
-                </Card>
-              );
-            })}
+            {Object.entries(todaysPrayerTimes)
+              .filter(([prayer]) => prayer !== 'sabahu') // Exclude sabahu from the main cards
+              .map(([prayer, time]) => {
+                const Icon = prayerIcons[prayer] || Sun;
+                const isActive = prayer === current;
+                const isNext = prayer === next;
+                
+                return (
+                  <Card 
+                    key={prayer} 
+                    className={`bg-black/10 backdrop-transparent border-2 transition-all duration-300 ${
+                      isActive ? 'border-green-400 prayer-glow' : 
+                      isNext ? 'border-orange-400 gentle-pulse prayer-glow tv-transition' : 'border-white/30'
+                    }`}
+                  >
+                    <CardContent className="p-4 text-center">
+                      <Icon className="w-6 h-6 mx-auto mb-2 opacity-30 text-white text-shadow-sm" />
+                      <div className="text-xl font-semibold text-white/70 mb-1">{prayerNames[prayer]}</div>
+                      <div className="text-3xl text-white/90 text-shadow-md font-bold">{time}</div>
+                      {prayer === 'imsaku' && todaysPrayerTimes.sabahu && (
+                        <div className="text-xs text-blue-300 mt-1 opacity-90">Sabahu: {todaysPrayerTimes.sabahu}</div>
+                      )}
+                      {isActive && (
+                        <div className="text-xs mt-1 text-green-400 gentle-pulse">&#9679; AKTUAL &#9679;</div>
+                      )}
+                      {isNext && (
+                        <div className="text-xs mt-1 text-orange-400">&#9679; I ARDHSH&#202;M &#9679;</div>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
           </div>
         
 
         {/* Settings button stays fixed at bottom right */}
         <button
           onClick={() => setShowForm(true)}
-          className="fixed bottom-6 right-6 z-50 p-3 bg-green-600 rounded-lg hover:bg-blue-700 hover:scale-100 transition-all duration-300 shadow-lg hover:shadow-xl cursor-pointer border-2 border-green-500 hover:border-blue-400"
+          className="fixed bottom-6 right-6 z-50 p-3 bg-transparent rounded-lg hover:bg-blue-70 hover:scale-130 transition-all duration-300 shadow-lg hover:shadow-xl cursor-pointer border-2 hover:border-green-400"
           style={{ pointerEvents: 'auto' }}
-          title="Cilësimet- Kliko për të ndryshuar të dhënat"
+          title="Cil&#235;simet- Kliko p&#235;r t&#235; ndryshuar t&#235; dh&#235;nat"
         >
           <Settings className="w-6 h-6" />
         </button>
@@ -442,4 +440,3 @@ function App() {
 }
 
 export default App
-

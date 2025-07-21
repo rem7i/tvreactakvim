@@ -5,6 +5,7 @@ import { getParisTime } from './timezone.js'
 export const getTodaysPrayerTimes = (prayerData) => {
   return {
     imsaku: '03:02',
+    sabahu: '03:22',
     sunrise: '05:06', 
     dreka: '12:44',
     ikindia: '16:46',
@@ -142,4 +143,3 @@ export const prayerNames = {
   akshami: 'Akshami',
   jacia: 'Jacia'
 }
-
