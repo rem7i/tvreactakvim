@@ -159,3 +159,205 @@
 .gentle-pulse {
   animation: gentle-pulse 3s ease-in-out infinite;
 }
+
+/* Responsive Design for TV Screens */
+@media screen and (max-height: 1080px) {
+  /* Adjust spacing and font sizes for 1080p screens */
+  .tv-responsive-padding {
+    padding: 1.5vh 2vw;
+  }
+}
+
+@media screen and (max-height: 900px) {
+  /* 900p screens - more compact layout */
+  .text-shadow-lg {
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.8);
+  }
+  
+  .text-shadow-xl {
+    text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.9);
+  }
+}
+
+@media screen and (max-height: 768px) {
+  /* 768p screens - compact layout */
+  body {
+    font-size: 14px;
+  }
+  
+  /* Reduce clock size */
+  .clock-display {
+    font-size: 6vw !important;
+  }
+  
+  /* Reduce prayer times grid spacing */
+  .prayer-times-grid {
+    gap: 0.5rem !important;
+  }
+  
+  .prayer-card {
+    padding: 0.5rem !important;
+  }
+  
+  .prayer-name {
+    font-size: 0.9rem !important;
+  }
+  
+  .prayer-time {
+    font-size: 1.5rem !important;
+  }
+}
+
+@media screen and (max-height: 720px) {
+  /* 720p screens - very compact layout */
+  body {
+    font-size: 12px;
+  }
+  
+  /* Further reduce clock size */
+  .clock-display {
+    font-size: 5vw !important;
+  }
+  
+  /* Compact prayer times */
+  .prayer-times-grid {
+    gap: 0.25rem !important;
+  }
+  
+  .prayer-card {
+    padding: 0.25rem !important;
+  }
+  
+  .prayer-name {
+    font-size: 0.8rem !important;
+  }
+  
+  .prayer-time {
+    font-size: 1.2rem !important;
+  }
+  
+  /* Reduce padding throughout */
+  .tv-compact-padding {
+    padding: 0.5vh 1vw;
+  }
+  
+  /* Make countdown/quotes smaller */
+  .countdown-display {
+    padding: 0.5rem !important;
+  }
+  
+  .countdown-text {
+    font-size: 1.5rem !important;
+  }
+  
+  /* Scrollable prayer times if needed */
+  .prayer-times-scrollable {
+    max-height: 15vh;
+    overflow-y: auto;
+  }
+  
+  /* Hide some decorative elements on very small screens */
+  .text-shadow-lg,
+  .text-shadow-xl {
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+  }
+  
+  /* Compact date display */
+  .date-display {
+    font-size: 0.9rem !important;
+  }
+  
+  /* Reduce mosque/imam info size */
+  .info-text {
+    font-size: 0.9rem !important;
+  }
+}
+
+@media screen and (max-height: 600px) {
+  /* Very small screens - ultra compact */
+  body {
+    font-size: 10px;
+  }
+  
+  .clock-display {
+    font-size: 4vw !important;
+  }
+  
+  .countdown-text {
+    font-size: 1.2rem !important;
+  }
+  
+  .prayer-times-scrollable {
+    max-height: 12vh;
+  }
+  
+  /* Hide decorative icons on very small screens */
+  .prayer-card .lucide-icon {
+    display: none;
+  }
+  
+  /* Stack prayer times in 2 rows on very small screens */
+  .prayer-times-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 0.2rem !important;
+  }
+  
+  .prayer-name {
+    font-size: 0.7rem !important;
+  }
+  
+  .prayer-time {
+    font-size: 1rem !important;
+  }
+}
+
+/* Custom scrollbar for prayer times */
+.prayer-times-scrollable::-webkit-scrollbar {
+  width: 6px;
+}
+
+.prayer-times-scrollable::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.prayer-times-scrollable::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+.prayer-times-scrollable::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Ensure smooth scrolling on smaller screens */
+.smooth-scroll {
+  scroll-behavior: smooth;
+}
+
+@media screen and (max-width: 1366px) {
+  /* Adjust for narrower screens */
+  .prayer-times-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+
+@media screen and (max-width: 1024px) {
+  /* Tablet/smaller TV screens */
+  .prayer-times-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.5rem !important;
+  }
+}
+
+/* Ensure content fits viewport */
+.viewport-fit {
+  height: 100vh;
+  overflow: hidden;
+}
+
+.flex-viewport {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
