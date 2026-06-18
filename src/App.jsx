@@ -286,7 +286,7 @@ function App() {
 
   return (
     <div 
-      className="min-h-screen bg-cover bg-center bg-no-repeat relative transition-all duration-1000"
+      className="viewport-fit bg-cover bg-center bg-no-repeat relative transition-all duration-1000"
       style={{ 
         backgroundImage: `url(${backgroundImage || mosqueBg})`,
         backgroundSize: 'cover',
@@ -295,33 +295,33 @@ function App() {
     >
       <div className="absolute inset-0 bg-black/40" />
       
-      <div className="relative z-10 p-8 text-white min-h-screen flex flex-col">
+      <div className="relative z-10 tv-responsive-padding text-white viewport-fit flex flex-col">
         {/* Top Bar with Dates */}
-        <div className="flex justify-between items-start mb-8">
-          <div className="text-lg font-medium text-shadow-lg">
+        <div className="flex justify-between items-start mb-4">
+          <div className="text-lg font-medium text-shadow-lg date-display">
             {formatAlbanianDate(currentTime)}
           </div>
-          <div className="text-lg font-medium text-shadow-lg">
+          <div className="text-lg font-medium text-shadow-lg date-display">
             {formatIslamicDate(currentTime)}
           </div>
         </div>
 
         {/* Center Content */}
-        <div className="flex-1 flex flex-col justify-center items-center px-2">
+        <div className="flex-viewport flex flex-col justify-center items-center px-2">
           {/* Large Clock */}
-          <div className="text-center mb-4">
-            <div className="text-8xl font-mono font-bold text-shadow-xl tracking-wider">
+          <div className="text-center mb-2">
+            <div className="text-8xl font-mono font-bold text-shadow-xl tracking-wider clock-display">
               {currentTime.toLocaleTimeString('en-GB')}
             </div>
           </div>
           <div className="max-w-4xl w-full">
             {showCountdown ? (
-              <div className="text-center w-full p-4 rounded-2xl backdrop-transparent border border-yellow-500/30 shadow-2xl prayer-glow tv-transition">
+              <div className="text-center w-full p-4 rounded-2xl backdrop-transparent border border-yellow-500/30 shadow-2xl prayer-glow tv-transition countdown-display">
                 <div className="text-xl font-medium mb-2 text-yellow-100 text-shadow-lg">&#9201; Vakti i ardhsh&#235;m</div>
-                <p className="text-3xl font-bold mb-1 text-white text-shadow-xl">
+                <p className="text-3xl font-bold mb-1 text-white text-shadow-xl countdown-text">
                   {prayerNames[next]}
                 </p>
-                <p className="text-2xl font-semibold text-yellow-100 text-shadow-lg">
+                <p className="text-2xl font-semibold text-yellow-100 text-shadow-lg countdown-text">
                   edhe {(() => {
                     // Calculate time until next prayer
                     const now = currentTime;
@@ -350,10 +350,10 @@ function App() {
                 </p>
               </div>  
             ) : (
-              <div className="text-center w-full p-4 rounded-2xl backdrop-transparent border border-yellow-500/30 shadow-2xl prayer-glow tv-transition">
+              <div className="text-center w-full p-4 rounded-2xl backdrop-transparent border border-yellow-500/30 shadow-2xl prayer-glow tv-transition countdown-display">
                 {formData.announcementContent ? (
                   <>
-                    <p className="text-3xl font-bold mb-1 text-white text-shadow-xl">
+                    <p className="text-3xl font-bold mb-1 text-white text-shadow-xl countdown-text">
                       {formData.announcementContent}
                     </p>
                     {formData.announcementTitle && (
@@ -364,7 +364,7 @@ function App() {
                   </>
                 ) : (
                   <>
-                    <p className="text-3xl font-bold mb-1 text-white text-shadow-xl">
+                    <p className="text-3xl font-bold mb-1 text-white text-shadow-xl countdown-text">
                       {currentQuote.text}
                     </p>
                     <p className="text-lg font-semibold text-yellow-100 text-shadow-lg">
@@ -379,17 +379,17 @@ function App() {
         {/* Info Row - Mosque and Imam */}
         {(formData.mosqueName || formData.location || formData.imam) && (
           <div className="flex justify-between items-center w-full px-8 pb-2">
-            <div className="text-green-300 font-semibold text-xl">
+            <div className="text-green-300 font-semibold text-xl info-text">
               {formData.mosqueName && <>🕌 {formData.mosqueName}</>}
               {formData.location && <span className="ml-2 text-white font-normal">{formData.location}</span>}
             </div>
-            <div className="text-blue-300 font-semibold text-xl">
+            <div className="text-blue-300 font-semibold text-xl info-text">
               {formData.imam && <>🎓 {formData.imam}</>}
             </div>
           </div>
         )}
         {/* Bottom Prayer Times */}
-          <div className="grid grid-cols-6 gap-4">
+          <div className="grid grid-cols-6 gap-4 prayer-times-grid prayer-times-scrollable smooth-scroll">
             {Object.entries(todaysPrayerTimes)
               .filter(([prayer]) => prayer !== 'sabahu') // Exclude sabahu from the main cards
               .map(([prayer, time]) => {
@@ -400,15 +400,15 @@ function App() {
                 return (
                   <Card 
                     key={prayer} 
-                    className={`bg-black/10 backdrop-transparent border-2 transition-all duration-300 ${
+                    className={`bg-black/10 backdrop-transparent border-2 transition-all duration-300 prayer-card ${
                       isActive ? 'border-green-400 prayer-glow' : 
                       isNext ? 'border-orange-400 gentle-pulse prayer-glow tv-transition' : 'border-white/30'
                     }`}
                   >
                     <CardContent className="p-4 text-center">
-                      <Icon className="w-6 h-6 mx-auto mb-2 opacity-30 text-white text-shadow-sm" />
-                      <div className="text-xl font-semibold text-white/70 mb-1">{prayerNames[prayer]}</div>
-                      <div className="text-3xl text-white/90 text-shadow-md font-bold">{time}</div>
+                      <Icon className="w-6 h-6 mx-auto mb-2 opacity-30 text-white text-shadow-sm lucide-icon" />
+                      <div className="text-xl font-semibold text-white/70 mb-1 prayer-name">{prayerNames[prayer]}</div>
+                      <div className="text-3xl text-white/90 text-shadow-md font-bold prayer-time">{time}</div>
                       {prayer === 'imsaku' && todaysPrayerTimes.sabahu && (
                         <div className="text-xs text-blue-300 mt-1 opacity-90">Sabahu: {todaysPrayerTimes.sabahu}</div>
                       )}
